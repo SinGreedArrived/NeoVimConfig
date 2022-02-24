@@ -1,9 +1,6 @@
--- Setup nvim-cmp
-local cmp = require "cmp"
--- lspkind
-local lspkind = require "lspkind"
+local lspkind = require'lspkind'
 lspkind.init {
-  with_text = true,
+  mode = "symbol_text",
   symbol_map = {
     Text = "",
     Method = "ƒ",
@@ -28,7 +25,7 @@ lspkind.init {
   },
 }
 
--- @TODOUA: Try cmdline again soon, lots of updates since last tried
+local cmp = require'cmp'
 cmp.setup {
   snippet = {
     expand = function(args)
@@ -96,7 +93,7 @@ cmp.setup.cmdline('/', {
     { name = 'buffer' }
   }
 })
--- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+-- -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
   sources = cmp.config.sources({
     { name = 'path' }

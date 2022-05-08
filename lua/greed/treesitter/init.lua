@@ -1,22 +1,22 @@
 require'nvim-treesitter.configs'.setup {
   -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-  ensure_installed = { 
-    "go", 
-    "gomod", 
-    "javascript", 
-    "php", 
-    "bash", 
-    "lua", 
-    "json", 
-    "perl", 
-    "c", 
-    "cpp", 
-    "vim", 
-    "yaml", 
-    "make", 
-    "cmake", 
-    "python", 
-    "graphql" 
+  ensure_installed = {
+    "go",
+    "gomod",
+    "javascript",
+    "php",
+    "bash",
+    "lua",
+    "json",
+    "perl",
+    "c",
+    "cpp",
+    "vim",
+    "yaml",
+    "make",
+    "cmake",
+    "python",
+    "graphql"
   },
 
   -- Install languages synchronously (only applied to `ensure_installed`)

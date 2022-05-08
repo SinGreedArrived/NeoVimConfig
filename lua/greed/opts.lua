@@ -49,4 +49,6 @@ vim.g.markdown_fenced_languages = {'zsh', 'nvim', 'go' }
 vim.g.termbufm_direction_cmd = 'new'
 
 vim.o.termguicolors = true
-cmd "colorscheme sonokai" 
+--cmd "colorscheme sonokai"
+cmd "colorscheme gruvbox"
+cmd "set mouse=a"

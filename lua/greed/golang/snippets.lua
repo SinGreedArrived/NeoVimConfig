@@ -50,7 +50,7 @@ ls.snippets = {
       dscr = "create method",
     },{
       text({"",
-      "func ("}), insert(1,"o *object"), text(") "), insert(2,"Set"), text("("), insert(3,"i interface{}"), text(") "), insert(4,"error"), text({" {",
+      "func ("}), insert(1,"o *object"), text(") "), insert(2,"FuncName"), text("("), insert(3,"args ...interface{}"), text(") "), insert(4,"error"), text({" {",
         "\t"}), insert(5), text({"","\treturn "}), insert(0), text({"",
       "}"})
     }),
@@ -58,16 +58,18 @@ ls.snippets = {
       trig = "iferr",
       dscr = "check function error and return error wrap",
     },{
-      text("if "), insert(1), text("err := "), insert(2, "obj."), insert(3, "funcName"), text("("), insert(4), text({"); err != nil {",
-      '\t return '}), insert(5), text('fmt.Errorf("'), func(copy, 3), text({': %w", err)','}'}), insert(0)
+      text("if "), insert(1), text("err := "), insert(2,"obj."),insert(3, "FuncName"), text("("), insert(4), text({"); err != nil {",
+      '\treturn '}), insert(5), text('fmt.Errorf("'), func(copy, 3), text({': %w", err)',
+      '}'}), insert(0)
     }),
     snip({
       trig = "iferr1",
       dscr = "check function error and return error wrap",
     },{
-      text({"if err != nil {",
-      '\treturn fmt.Errorf("'}), insert(1), text({': %w", err)',
-      "}"})
+      insert(1,"result"),text(", err := "),insert(2,"obj."),insert(3,"Func"),text("("),insert(4),text({")",
+      "if err != nil {",
+      '\treturn fmt.Errorf("'}), func(copy,3), text({': %w", err)',
+      "}"}), insert(0)
     }),
     snip({
       trig = "append",
@@ -81,6 +83,15 @@ ls.snippets = {
     },{
       text("for "), insert(1,"v"), text(" := range "), insert(2, "interface{}"), text({" {",
       "\t"}), insert(0), text({"", "}"})
+    }),
+    snip({
+      trig = "debug_print",
+      dscr = "debug print struct",
+    },{
+      text({"","func(i interface{}) {", 
+      "\tdata, _ := json.MarshalIndent(i, \"\", \"\\t\")",
+      "\tfmt.Println(string(data))",
+      "}("}), insert(0, "interface{}"), text({")",""})
     }),
   }
 }

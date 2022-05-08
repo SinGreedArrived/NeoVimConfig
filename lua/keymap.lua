@@ -3,8 +3,8 @@ local cmp = require'cmp'
 local default_opts = {noremap = true, silent = true}
 
 -- Системный буфер обмена shift - Y
-map('', 'by', '"+y', default_opts)
-map('', 'bp', '"+p', default_opts)
+map('', '<leader>y', '"+y', default_opts)
+map('', '<leader>p', '"+p', default_opts)
 -- Стрелочки откл. Использовать hjkl
 map('', '<up>', ':echoe "Use k"<CR>', {noremap = true, silent = false})
 map('', '<down>', ':echoe "Use j"<CR>', {noremap = true, silent = false})

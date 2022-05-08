@@ -1,4 +1,6 @@
+local cmp = require'cmp'
 local lspkind = require'lspkind'
+
 lspkind.init {
   mode = "symbol_text",
   symbol_map = {
@@ -25,16 +27,17 @@ lspkind.init {
   },
 }
 
-local cmp = require'cmp'
 cmp.setup {
   snippet = {
     expand = function(args)
-        local luasnip = require("luasnip")
-        if not luasnip then
-            return
-        end
-        luasnip.lsp_expand(args.body)
+        require("luasnip").lsp_expand(args.body)
     end,
+  },
+  window = {
+    documentation = {
+      border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+    },
+  --  documentation = cmp.config.window.bordered(),
   },
   mapping = {
     ["<C-d>"] = cmp.mapping.scroll_docs(-4),
@@ -54,9 +57,6 @@ cmp.setup {
   },
   experimental = {
     ghost_text = true,
-  },
-  documentation = {
-    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
   },
   sources = {
     { name = "nvim_lsp" },
@@ -101,7 +101,6 @@ cmp.setup.cmdline(':', {
     { name = 'cmdline' }
   })
 })
-
 
 -- insert `(` after select function or method item
 -- local cmp_autopairs = require "nvim-autopairs.completion.cmp"

@@ -1,4 +1,5 @@
-require("greed.plugins")
-require("greed.opts")
-require("greed.lualine")
-require("keymap")
+config_dir = "main."
+
+require( config_dir .. "plugins")
+require( config_dir .. "keymap")
+require( config_dir .. "opts")

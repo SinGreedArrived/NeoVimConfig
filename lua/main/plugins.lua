@@ -20,6 +20,7 @@ vim.cmd [[
   augroup end
 ]]
 
+
 return require("packer").startup {
   function(use)
     use 'wbthomason/packer.nvim'
@@ -34,8 +35,7 @@ return require("packer").startup {
         { 'hrsh7th/cmp-buffer' },
         { 'tamago324/cmp-zsh' },
         { 'hrsh7th/cmp-path' },
-        { 'L3MON4D3/LuaSnip' },
-        { 'saadparwaiz1/cmp_luasnip' },
+        { 'onsails/lspkind-nvim' },
       },
     config = function()
       require( config_dir .. 'completion')
@@ -49,7 +49,7 @@ return require("packer").startup {
           { 'rafamadriz/friendly-snippets' },
         },
         config = function()
-          require( config_dir .. 'LuaSnip')
+          require( config_dir .. 'luasnip')
         end
     }
     --
@@ -59,7 +59,7 @@ return require("packer").startup {
       requires = {
         'kyazdani42/nvim-web-devicons', -- optional, for file icon
       },
-      config = function() 
+      config = function()
         require( config_dir .. 'nvim-tree' )
       end,
       tag = 'nightly' -- optional, updated every week. (see issue #1193)
@@ -100,72 +100,6 @@ return require("packer").startup {
           require( config_dir .. 'go-nvim')
       end
     }
-   --  use 'nvim-lua/plenary.nvim'
-   --  use 'nvim-lua/popup.nvim'
-   --  use 'tveskag/nvim-blame-line'
-   --  use {
-   --      'nvim-treesitter/nvim-treesitter',
-   --      run = ':TSUpdate',
-   --      config = function()
-   --        require('greed.treesitter')
-   --      end,
-   --  }
-    -- use "BurntSushi/ripgrep"
-   --  use "onsails/lspkind-nvim"
-   --  use {
-   --    'nvim-telescope/telescope.nvim',
-   --    requires = {{'nvim-lua/popup.nvim'}, {'nvim-lua/plenary.nvim'}},
-   --    config = function()
-   --      require('greed.telescope')
-   --    end,
-   --  }
-   --  use { "leoluz/nvim-dap-go" }
-   --  use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
-   --  use {'ray-x/guihua.lua', run = 'cd lua/fzy && make'}
-	  -- use {
-   --    'L3MON4D3/LuaSnip',
-   --    config = function()
-   --      require('greed.golang.snippets')
-   --    end
-   --  }
-  	-- use 'saadparwaiz1/cmp_luasnip'
-   --  use {
-   --    "lewis6991/gitsigns.nvim",
-   --    requires = { "nvim-lua/plenary.nvim" },
-   --  }
-   --  use {
-   --    'nvim-lualine/lualine.nvim',
-   --    config = function()
-   --      require'greed.lualine'
-   --    end,
-   --    requires = { 'kyazdani42/nvim-web-devicons', opt = true }
-   --  }
-   --  use {
-   --    'kdheepak/tabline.nvim',
-   --    config = function()
-   --      require'greed.tabline'
-   --    end,
-   --    requires = { { 'hoob3rt/lualine.nvim', opt=true }, {'kyazdani42/nvim-web-devicons', opt = true} }
-   --  }
-   --  use {
-   --    'kyazdani42/nvim-tree.lua',
-   --    requires = {
-   --      'kyazdani42/nvim-web-devicons', -- optional, for file icon
-   --    },
-   --    config = function()
-   --      require'greed.nvim-tree'
-   --    end
-   --  }
-   --  use {
-   --    'preservim/tagbar'
-   --  }
-   --  use {
-   --    "NTBBloodbath/rest.nvim",
-   --    requires = { "nvim-lua/plenary.nvim" },
-   --    config = function()
-   --      require'greed.rest'
-   --    end
-   --  }
     use {
 	  'morhetz/gruvbox',
 	  config = function()

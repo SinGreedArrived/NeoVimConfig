@@ -6,6 +6,12 @@ end
 local luasnip = require("luasnip")
 local cmp = require'cmp'
 
+local ok, lspkind = pcall(require, "lspkind")
+if not ok then
+  return
+end
+lspkind.init()
+
  cmp.setup({
    snippet = {
      -- REQUIRED - you must specify a snippet engine
@@ -26,33 +32,51 @@ local cmp = require'cmp'
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
     ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-    ["<C-n>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      elseif has_words_before() then
-        cmp.complete()
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
-    ["<C-p>"] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { "i", "s" }),
+   --  ["<C-n>"] = cmp.mapping(function(fallback)
+   --    if cmp.visible() then
+   --      cmp.select_next_item()
+   --    elseif luasnip.expand_or_jumpable() then
+   --      luasnip.expand_or_jump()
+   --    elseif has_words_before() then
+   --      cmp.complete()
+   --    else
+   --      fallback()
+   --    end
+   --  end, { "i", "s" }),
+   --  ["<C-p>"] = cmp.mapping(function(fallback)
+   --    if cmp.visible() then
+   --      cmp.select_prev_item()
+   --    elseif luasnip.jumpable(-1) then
+   --      luasnip.jump(-1)
+   --    else
+   --      fallback()
+   --    end
+   --  end, { "i", "s" }),
    }),
-   sources = cmp.config.sources({
+   sources = {
       { name = 'nvim_lsp' },
       { name = 'luasnip' }, -- For luasnip users.
       { name = 'buffer' },
       { name = 'treesitter' },
-   })
+   },
+  formatting = {
+    -- Youtube: How to set up nice formatting for your sources.
+    format = lspkind.cmp_format {
+      with_text = true,
+      menu = {
+        buffer = "[buf]",
+        nvim_lsp = "[LSP]",
+        nvim_lua = "[api]",
+        path = "[path]",
+        luasnip = "[snip]",
+        gh_issues = "[issues]",
+        tn = "[TabNine]",
+      },
+    },
+  },
+  experimental = {
+    ghost_text = true,
+  }
  })
 
  -- Set configuration for specific filetype.

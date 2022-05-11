@@ -2,6 +2,7 @@ local default_opts = {noremap = true, silent = true}
 local map = vim.api.nvim_set_keymap
 local cmp = require'cmp'
 local cmd = vim.cmd
+local ls = require("luasnip")
 
 cmd [[ set termguicolors ]]
 
@@ -36,6 +37,36 @@ local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', default_opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', default_opts)
 end
+
+-- luasnip
+vim.keymap.set("n", "<leader><leader>s", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR>")
+
+vim.keymap.set({ "i","s" }, "<c-k>", function ()
+  if ls.expand_or_jumpable() then
+    ls.expand_or_jump()
+  end
+end, { silent = true })
+
+vim.keymap.set({ "i","s" }, "<c-j>", function ()
+  if ls.jumpable(-1) then
+    ls.jump(-1)
+  end
+end, { silent = true })
+
+vim.keymap.set("i", "<c-l>", function ()
+  if ls.choice_active() then
+    ls.change_choice(1)
+  end
+end, { silent = true })
+
+vim.keymap.set("i", "<c-h>", function ()
+  if ls.choice_active() then
+    ls.change_choice(-1)
+  end
+end, { silent = true })
+
+-- vim.api.nvim_set_keymap('i', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
+-- vim.api.nvim_set_keymap('s', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches

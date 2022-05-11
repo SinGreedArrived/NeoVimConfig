@@ -65,6 +65,21 @@ vim.keymap.set("i", "<c-h>", function ()
   end
 end, { silent = true })
 
+-- telescope
+vim.keymap.set('n', ';f', '<cmd>lua require("telescope.builtin").find_files({ hidden = true })<CR>',default_opts)
+vim.keymap.set('n', ';e', '<cmd>lua require("telescope.builtin").live_grep()<CR>', default_opts)
+vim.keymap.set('n', ';b', '<cmd>lua require("telescope.builtin").buffers()<CR>', default_opts)
+
+-- user key
+vim.keymap.set('n', ';w', '<cmd>w<CR>', default_opts)
+vim.keymap.set('n', ';q', '<cmd>q!<CR>', default_opts)
+
+-- bufferline
+vim.keymap.set('', '<TAB>', '<cmd>:BufferLineCycleNext<CR>', default_opts)
+vim.keymap.set('', '<S-TAB>', '<cmd>:BufferLineCyclePrev<CR>', default_opts)
+-- vim.keymap.set('', '<leader>j', '<cmd>:BufferLineMoveNext<CR>', default_opts)
+-- vim.keymap.set('', '<c-S-TAB>', '<cmd>:BufferLineMovePrev<CR>', default_opts)
+
 -- vim.api.nvim_set_keymap('i', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
 -- vim.api.nvim_set_keymap('s', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
 

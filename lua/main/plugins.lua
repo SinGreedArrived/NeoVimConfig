@@ -101,6 +101,25 @@ return require("packer").startup {
       end
     }
     use {
+      'nvim-telescope/telescope.nvim',
+      requires = {
+        { 'nvim-lua/plenary.nvim' },
+      },
+      config = function ()
+        require( config_dir .. 'nvim-telescope' )
+      end
+    }
+    use {
+      'akinsho/bufferline.nvim',
+      tag = "v2.*",
+      requires = {
+        { 'kyazdani42/nvim-web-devicons' },
+      },
+      config = function ()
+        require( config_dir .. 'bufferline' )
+      end
+    }
+    use {
 	  'morhetz/gruvbox',
 	  config = function()
 		vim.cmd [[ colorscheme gruvbox ]]

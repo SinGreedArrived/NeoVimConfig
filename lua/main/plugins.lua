@@ -12,14 +12,6 @@ if fn.empty(fn.glob(install_path)) > 0 then
     install_path,
   }
 end
--- sync plugins on write/save
-vim.cmd [[
-  augroup packer_sync_plugins
-    autocmd!
-    autocmd BufWritePost plugins.lua source <afile> | PackerSync
-  augroup end
-]]
-
 
 return require("packer").startup {
   function(use)
@@ -83,6 +75,8 @@ return require("packer").startup {
    use {
     'nvim-treesitter/nvim-treesitter',
     requires = {
+      { 'nvim-treesitter/nvim-treesitter-textobjects' },
+      { 'nvim-treesitter/playground' },
       { 'ray-x/cmp-treesitter' },
     },
     config = function()
@@ -95,15 +89,21 @@ return require("packer").startup {
         { 'mfussenegger/nvim-dap' },
         { 'rcarriga/nvim-dap-ui' },
         { 'theHamsta/nvim-dap-virtual-text' },
+        { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
       },
       config = function()
           require( config_dir .. 'go-nvim')
       end
     }
     use {
+      'sumneko/lua-language-server',
+    }
+    use {
       'nvim-telescope/telescope.nvim',
       requires = {
         { 'nvim-lua/plenary.nvim' },
+        { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' },
+        { 'kdheepak/lazygit.nvim' },
       },
       config = function ()
         require( config_dir .. 'nvim-telescope' )
@@ -119,6 +119,35 @@ return require("packer").startup {
         require( config_dir .. 'bufferline' )
       end
     }
+    use {
+      "NTBBloodbath/rest.nvim",
+      requires = { "nvim-lua/plenary.nvim" },
+      config = function()
+        require( config_dir .. "rest" )
+      end
+    }
+    use {
+      'sindrets/diffview.nvim',
+    }
+    -- use {
+    --   'lewis6991/gitsigns.nvim',
+    --   config = function()
+    --     require('gitsigns').setup()
+    --   end
+    -- }
+    use {
+      'edolphin-ydf/goimpl.nvim',
+      requires = {
+        {'nvim-lua/plenary.nvim'},
+        {'nvim-lua/popup.nvim'},
+        {'nvim-telescope/telescope.nvim'},
+        {'nvim-treesitter/nvim-treesitter'},
+      },
+      config = function()
+        require'telescope'.load_extension'goimpl'
+      end,
+    }
+    -- Themes
     use {
 	  'morhetz/gruvbox',
 	  config = function()

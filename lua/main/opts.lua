@@ -3,6 +3,7 @@ local exec = vim.api.nvim_exec  -- execute Vimscript
 local g = vim.g                 -- global variables
 local opt = vim.opt             -- global/buffer/windows-scoped options
 
+
 g.ale_sign_error = '❌'
 g.ale_sign_warning = '⚠️'
 g.ale_fix_on_save = 1
@@ -50,4 +51,4 @@ vim.g.termbufm_direction_cmd = 'new'
 
 vim.o.termguicolors = true
 --cmd "colorscheme sonokai"
-g.mouse = 'a'
+vim.o.mouse = 'a'

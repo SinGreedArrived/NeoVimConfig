@@ -1,6 +1,10 @@
 -- require("luasnip.loaders.from_vscode").lazy_load()
-
 local ls = require "luasnip"
+require("luasnip.session.snippet_collection").clear_snippets "go"
+local tj = require(config_dir .. "luasnip.tj")
+local snippet = ls.s
+local snippet_from_nodes = ls.sn
+
 local types = require("luasnip.util.types")
 -- -- some shorthands...
 local s = ls.snippet
@@ -21,8 +25,19 @@ local fmt = require("luasnip.extras.fmt").fmt
 local fmta = require("luasnip.extras.fmt").fmta
 local conds = require("luasnip.extras.expand_conditions")
 
--- If you're reading this file for the first time, best skip to around line 190
--- where the actual snippet-definitions start.
+local ts_locals = require "nvim-treesitter.locals"
+local ts_utils = require "nvim-treesitter.ts_utils"
+local get_node_text = vim.treesitter.get_node_text
+
+vim.treesitter.set_query(
+  "go",
+  "LuaSnip_Result",
+  [[ [
+    (method_declaration result: (_) @id)
+    (function_declaration result: (_) @id)
+    (func_literal result: (_) @id)
+  ] ]]
+)
 
 -- Every unspecified option will be set to the default.
 ls.config.set_config({
@@ -37,113 +52,38 @@ ls.config.set_config({
 			},
 		},
 	},
-	-- treesitter-hl has 100, use something higher (default is 200).
-	--ext_base_prio = 300,
-	-- minimal increase in priority.
-	-- ext_prio_increase = 1,
 })
 
+local shortcut = function(val)
+  if type(val) == "string" then
+    return { t { val }, i(0) }
+  end
 
--- args is a table, where 1 is the text in Placeholder 1, 2 the text in
--- placeholder 2,...
--- 'recursive' dynamic snippet. Expands to some text followed by itself.
-local rec_ls
-rec_ls = function()
-	return sn(
-		nil,
-		c(1, {
-			-- Order is important, sn(...) first would cause infinite loop of expansion.
-			t(""),
-			sn(nil, { t({ "", "\t\\item " }), i(1), d(2, rec_ls, {}) }),
-		})
-	)
+  if type(val) == "table" then
+    for k, v in ipairs(val) do
+      if type(v) == "string" then
+        val[k] = t { v }
+      end
+    end
+  end
+
+  return val
 end
 
--- complicated function for dynamicNode.
-local function jdocsnip(args, _, old_state)
-	-- !!! old_state is used to preserve user-input here. DON'T DO IT THAT WAY!
-	-- Using a restoreNode instead is much easier.
-	-- View this only as an example on how old_state functions.
-	local nodes = {
-		t({ "/**", " * " }),
-		i(1, "A short Description"),
-		t({ "", "" }),
-	}
 
-	-- These will be merged with the snippet; that way, should the snippet be updated,
-	-- some user input eg. text can be referred to in the new snippet.
-	local param_nodes = {}
+local same = function(index)
+  return f(function(args)
+    return args[1]
+  end, { index })
+end
 
-	if old_state then
-		nodes[2] = i(1, old_state.descr:get_text())
-	end
-	param_nodes.descr = nodes[2]
+local make = function(tbl)
+  local result = {}
+  for k, v in pairs(tbl) do
+    table.insert(result, (snippet({ trig = k, desc = v.desc }, shortcut(v))))
+  end
 
-	-- At least one param.
-	if string.find(args[2][1], ", ") then
-		vim.list_extend(nodes, { t({ " * ", "" }) })
-	end
-
-	local insert = 2
-	for indx, arg in ipairs(vim.split(args[2][1], ", ", true)) do
-		-- Get actual name parameter.
-		arg = vim.split(arg, " ", true)[2]
-		if arg then
-			local inode
-			-- if there was some text in this parameter, use it as static_text for this new snippet.
-			if old_state and old_state[arg] then
-				inode = i(insert, old_state["arg" .. arg]:get_text())
-			else
-				inode = i(insert)
-			end
-			vim.list_extend(
-				nodes,
-				{ t({ " * @param " .. arg .. " " }), inode, t({ "", "" }) }
-			)
-			param_nodes["arg" .. arg] = inode
-
-			insert = insert + 1
-		end
-	end
-
-	if args[1][1] ~= "void" then
-		local inode
-		if old_state and old_state.ret then
-			inode = i(insert, old_state.ret:get_text())
-		else
-			inode = i(insert)
-		end
-
-		vim.list_extend(
-			nodes,
-			{ t({ " * ", " * @return " }), inode, t({ "", "" }) }
-		)
-		param_nodes.ret = inode
-		insert = insert + 1
-	end
-
-	if vim.tbl_count(args[3]) ~= 1 then
-		local exc = string.gsub(args[3][2], " throws ", "")
-		local ins
-		if old_state and old_state.ex then
-			ins = i(insert, old_state.ex:get_text())
-		else
-			ins = i(insert)
-		end
-		vim.list_extend(
-			nodes,
-			{ t({ " * ", " * @throws " .. exc .. " " }), ins, t({ "", "" }) }
-		)
-		param_nodes.ex = ins
-		insert = insert + 1
-	end
-
-	vim.list_extend(nodes, { t({ " */" }) })
-
-	local snip = sn(nil, nodes)
-	-- Error on attempting overwrite.
-	snip.old_state = param_nodes
-	return snip
+  return result
 end
 
 -- Make sure to not pass an invalid command, as io.popen() may write over nvim-text.
@@ -156,45 +96,91 @@ local function bash(_, _, command)
 	return res
 end
 
--- Returns a snippet_node wrapped around an insert_node whose initial
--- text value is set to the current date in the desired format.
-local date_input = function(args, state, fmt)
-	local fmt = fmt or "%Y-%m-%d"
-	return sn(nil, i(1, os.date(fmt)))
-end
-
 local function tableHasKey(table,key)
     return table[key] ~= nil
 end
 
-local function genReturn(args)
-  return f(function(arg)
-          local result = "return "
-          local switch = {
-            ["uint64"] = "0",
-            ["string"] = '""',
-          }
-          for v in string.gmatch(arg[1][1], "[^, ]+") do
-            if tableHasKey(switch, v) then
-              result = result .. switch[v] .. ', '
-            else
-              result = result .. 'nil' .. ', '
-            end
-          end
-          if string.len(arg[1][1]) == 0 then
-            return result
-          end
-          return result:sub(1, -3)
-        end, { args } )
+local transform = function(text, info)
+  if text == "int" then
+    return t "0"
+  elseif text == "error" then
+    if info then
+      info.index = info.index + 1
+
+      return c(info.index, {
+        t(string.format('errors.Wrap(%s, "%s")', info.err_name, info.func_name)),
+        t(info.err_name),
+      })
+    else
+      return t "err"
+    end
+  elseif text == "bool" then
+    return t "false"
+  elseif text == "string" then
+    return t '""'
+  elseif string.find(text, "*", 1, true) then
+    return t "nil"
+  end
+
+  return t(text)
+end
+
+local handlers = {
+  ["parameter_list"] = function(node, info)
+    local result = {}
+
+    local count = node:named_child_count()
+    for idx = 0, count - 1 do
+      table.insert(result, transform(get_node_text(node:named_child(idx), 0), info))
+      if idx ~= count - 1 then
+        table.insert(result, t { ", " })
+      end
+    end
+
+    return result
+  end,
+
+  ["type_identifier"] = function(node, info)
+    local text = get_node_text(node, 0)
+    return { transform(text, info) }
+  end,
+}
+
+local function go_result_type(info)
+  local cursor_node = ts_utils.get_node_at_cursor()
+  local scope = ts_locals.get_scope_tree(cursor_node, 0)
+
+  local function_node
+  for _, v in ipairs(scope) do
+    if v:type() == "function_declaration" or v:type() == "method_declaration" or v:type() == "func_literal" then
+      function_node = v
+      break
+    end
+  end
+
+  local query = vim.treesitter.get_query("go", "LuaSnip_Result")
+  for _, node in query:iter_captures(function_node, 0) do
+    if handlers[node:type()] then
+      return handlers[node:type()](node, info)
+    end
+  end
+end
+
+local go_ret_vals = function(args)
+  return snippet_from_nodes(
+    nil,
+    go_result_type {
+      index = 0,
+      err_name = args[1][1],
+      func_name = args[2][1],
+    }
+  )
 end
 
 
 
---
--- ls.parser.parse_snippet("lf", "local $1 = function($2)\n\t$0\nend")
 ls.add_snippets("go", {
-    s("meth",
-      fmt(
+    s("meth", fmt(
       [[
         func ({} {}{}) {}({}) ({}) {{ 
           {} 
@@ -207,24 +193,79 @@ ls.add_snippets("go", {
         i(4, "MethodName"),
         i(5, "args ...interface{}"),
         i(6),
+        i(7),
         i(0),
-        genReturn(6),
       })),
-    --     }
-    --   )
-    --   -- t({"",
-    --   -- "func ("}), i(1,"o *object"), t(") "), i(2,"FuncName"), t("("), i(3,"args ...interface{}"), t(") "), i(4,"error"), t({" {",
-    --   --   "\t"}), i(5), t({"","\treturn "}), i(0), t({"",
-    --   -- "}"})
+    s("forr", fmt(
+    [[
+      for {}, {} := range {} {{
+        {}
+      }}
+    ]], {
+      i(1, "_"),
+      i(2, "v"),
+      i(3, "Array"),
+      i(0),
+    })),
+    s("ife", fmt(
+    [[
+      if err := {}.{}({}); err != nil {{
+        return fmt.Errorf("{}: %w", err)
+      }}
+    ]], {
+      i(1, "obj"),
+      i(2, "Meth"),
+      i(3, "args"),
+      rep(2),
+    })),
+    s( "err", fmt(
+    [[
+      if err != nil {{
+        {}
+      }}
+    ]],{
+      i(0),
+    })),
+    s("typs", fmt(
+    [[
+      type {} struct {{
+        {}
+      }}
+    ]], {
+      i(1),
+      i(0),
+    })),
+    s("typi", fmt(
+    [[
+      type {} interface {{
+        {}
+      }}
+    ]], {
+      i(1),
+      i(0),
+    })),
+    s("efi", fmt(
+    [[
+      {}, {} := {}({}) 
+      if {} != nil {{
+        return {}
+      }}
+    ]], {
+      i(1, "result"),
+      i(2, "err"),
+      i(3, "function"),
+      i(4),
+      same(2),
+      d(5, go_ret_vals, {2,3} ),
+    })),
+    -- s({
+    --   trig = "ife",
+    --   dscr = "check ftion error and return error wrap",
+    -- },{
+    --   t("if "), i(1), t("err := "), i(2,"obj."),i(3, "fName"), t("("), i(4), t({"); err != nil {",
+    --   '\treturn '}), i(5), t('fmt.Errorf("'), rep(3), t({': %w", err)',
+    --   '}'}), i(0)
     -- }),
-    s({
-      trig = "ife",
-      dscr = "check ftion error and return error wrap",
-    },{
-      t("if "), i(1), t("err := "), i(2,"obj."),i(3, "fName"), t("("), i(4), t({"); err != nil {",
-      '\treturn '}), i(5), t('fmt.Errorf("'), rep(3), t({': %w", err)',
-      '}'}), i(0)
-    }),
     s({
       trig = "ife",
       dscr = "check ftion error and return error wrap",
@@ -238,14 +279,7 @@ ls.add_snippets("go", {
       trig = "append",
       dscr = "append to array",
     },{
-      i(1,"array"), t(" := append("), rep(1), t(", "), i(2, "interface{}"), t(")"), i(0)
-    }),
-    s({
-      trig = "range",
-      dscr = "for range",
-    },{
-      t("for "), i(1,"v"), t(" := range "), i(2, "interface{}"), t({" {",
-      "\t"}), i(0), t({"", "}"})
+      i(1,"array"), t(" = append("), rep(1), t(", "), i(2, "interface{}"), t(")"), i(0)
     }),
     s({
       trig = "debug_print",

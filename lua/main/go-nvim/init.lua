@@ -1,15 +1,12 @@
 require('go').setup()
+require("nvim-dap-virtual-text").setup()
 
 local opts = { noremap=true, silent=true }
 local map = vim.api.nvim_set_keymap
-vim.api.nvim_exec([[ autocmd BufWritePre *.go :silent! lua require('go.format').goimport() ]], false)
 
-map('n', '<space>rn', '<cmd>GoRename<CR>', opts)
---map('n', 'K', '<cmd>GoDoc<CR>', opts)
+-- map('n', '<space>rn', '<cmd>GoRename<CR>', opts)
+-- map('n', 'K', '<cmd>GoDoc<CR>', opts)
 map('n', 'gt', '<cmd>GoAddTags<CR>', opts)
-map('n', '<F8>', '<cmd>GoBreakToggle<CR>', opts)
-map('n', '<F9>', '<cmd>GoDebug<CR>', opts)
-map('n', '<F10>', '<cmd>GoDebug -t<CR>', opts)
 ----  map('n', '<F11>', '<cmd>GoDebug -s<CR><cmd>so ~/.config/nvim/lua/greed/golang/ray-x/keymap.lua<CR>', opts)
 --#regions
 

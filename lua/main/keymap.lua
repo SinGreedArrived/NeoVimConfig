@@ -69,8 +69,8 @@ vim.keymap.set('n', ';e', '<cmd>lua require("telescope.builtin").live_grep()<CR>
 vim.keymap.set('n', ';b', '<cmd>lua require("telescope.builtin").buffers()<CR>', default_opts)
 
 -- user key
-vim.keymap.set('n', ';w', '<cmd>w<CR>', default_opts)
-vim.keymap.set('n', ';W', '<cmd>wa<CR>', default_opts)
+vim.keymap.set('n', ';w', '<cmd>w!<CR>', default_opts)
+vim.keymap.set('n', ';W', '<cmd>wa!<CR>', default_opts)
 vim.keymap.set('n', ';q', '<cmd>bdelete<CR>', default_opts)
 vim.keymap.set('n', ';Q', '<cmd>q!<CR>', default_opts)
 vim.keymap.set('n', '<leader>c', '<cmd>nohlsearch<CR>', default_opts)

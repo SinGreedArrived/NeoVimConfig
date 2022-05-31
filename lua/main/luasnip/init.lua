@@ -106,9 +106,9 @@ local transform = function(text, info)
   elseif text == "error" then
     if info then
       info.index = info.index + 1
-
       return c(info.index, {
-        t(string.format('errors.Wrap(%s, "%s")', info.err_name, info.func_name)),
+        t(string.format('fmt.Errorf("%s: %%w", %s)', string.gsub(info.func_name, "[^.]+%.","",1), info.err_name)),
+        t(string.format('fmt.Errorf("%s: %%w", %s)', info.func_name, info.err_name)),
         t(info.err_name),
       })
     else
@@ -176,7 +176,6 @@ local go_ret_vals = function(args)
     }
   )
 end
-
 
 
 ls.add_snippets("go", {

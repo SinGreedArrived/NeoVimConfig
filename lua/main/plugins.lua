@@ -147,6 +147,13 @@ return require("packer").startup {
         require'telescope'.load_extension'goimpl'
       end,
     }
+    -- status bar --
+    use {
+      'feline-nvim/feline.nvim',
+      config = function ()
+        require('feline').setup()
+      end,
+    }
     -- Themes
     use {
 	  'morhetz/gruvbox',

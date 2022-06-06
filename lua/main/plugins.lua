@@ -129,12 +129,12 @@ return require("packer").startup {
     use {
       'sindrets/diffview.nvim',
     }
-    -- use {
-    --   'lewis6991/gitsigns.nvim',
-    --   config = function()
-    --     require('gitsigns').setup()
-    --   end
-    -- }
+    use {
+      'lewis6991/gitsigns.nvim',
+      config = function()
+        require('gitsigns').setup()
+      end
+    }
     use {
       'edolphin-ydf/goimpl.nvim',
       requires = {
@@ -145,6 +145,13 @@ return require("packer").startup {
       },
       config = function()
         require'telescope'.load_extension'goimpl'
+      end,
+    }
+    -- status bar --
+    use {
+      'feline-nvim/feline.nvim',
+      config = function ()
+        require('feline').setup()
       end,
     }
     -- Themes

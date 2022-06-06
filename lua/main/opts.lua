@@ -52,3 +52,4 @@ vim.g.termbufm_direction_cmd = 'new'
 vim.o.termguicolors = true
 --cmd "colorscheme sonokai"
 vim.o.mouse = 'a'
+vim.o.laststatus = 3

@@ -83,87 +83,87 @@ return require("packer").startup {
       require( config_dir .. 'nvim-treesitter' )
     end
    }
-    use {
-      'ray-x/go.nvim',
-      requires = {
-        { 'mfussenegger/nvim-dap' },
-        { 'rcarriga/nvim-dap-ui' },
-        { 'theHamsta/nvim-dap-virtual-text' },
-        { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
-      },
-      config = function()
-          require( config_dir .. 'go-nvim')
-      end
-    }
-    use {
-      'sumneko/lua-language-server',
-    }
-    use {
-      'nvim-telescope/telescope.nvim',
-      requires = {
-        { 'nvim-lua/plenary.nvim' },
-        { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' },
-        { 'kdheepak/lazygit.nvim' },
-      },
-      config = function ()
-        require( config_dir .. 'nvim-telescope' )
-      end
-    }
-    use {
-      'akinsho/bufferline.nvim',
-      tag = "v2.*",
-      requires = {
-        { 'kyazdani42/nvim-web-devicons' },
-      },
-      config = function ()
-        require( config_dir .. 'bufferline' )
-      end
-    }
-    use {
-      "NTBBloodbath/rest.nvim",
-      requires = { "nvim-lua/plenary.nvim" },
-      config = function()
-        require( config_dir .. "rest" )
-      end
-    }
-    use {
-      'sindrets/diffview.nvim',
-    }
-    use {
-      'lewis6991/gitsigns.nvim',
-      config = function()
-        require( config_dir .. "gitsigns" )
-      end
-    }
-    use {
-      'edolphin-ydf/goimpl.nvim',
-      requires = {
-        {'nvim-lua/plenary.nvim'},
-        {'nvim-lua/popup.nvim'},
-        {'nvim-telescope/telescope.nvim'},
-        {'nvim-treesitter/nvim-treesitter'},
-      },
-      config = function()
-        require'telescope'.load_extension'goimpl'
-      end,
-    }
-    -- status bar --
-    use {
-      'feline-nvim/feline.nvim',
-      config = function ()
-        require('feline').setup()
-      end,
-    }
-    -- Themes
-    use {
-	  'morhetz/gruvbox',
-	  config = function()
-		vim.cmd [[ colorscheme gruvbox ]]
-	  end
-    }
-    if PACKER_BOOTSTRAP then
-	    require("packer").sync()
+   use {
+    'mfussenegger/nvim-dap',
+    requires = {
+      { 'leoluz/nvim-dap-go' },
+      { 'rcarriga/nvim-dap-ui' },
+      { 'theHamsta/nvim-dap-virtual-text' },
+      { 'nvim-telescope/telescope-dap.nvim' },
+    },
+    config = function()
+        require( config_dir .. 'dap')
     end
+   }
+   use {
+     'sumneko/lua-language-server',
+   }
+   use {
+     'nvim-telescope/telescope.nvim',
+     requires = {
+       { 'nvim-lua/plenary.nvim' },
+       { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' },
+       { 'kdheepak/lazygit.nvim' },
+     },
+     config = function ()
+       require( config_dir .. 'nvim-telescope' )
+     end
+   }
+   use {
+     'akinsho/bufferline.nvim',
+     tag = "v2.*",
+     requires = {
+       { 'kyazdani42/nvim-web-devicons' },
+     },
+     config = function ()
+       require( config_dir .. 'bufferline' )
+     end
+   }
+   use {
+     "NTBBloodbath/rest.nvim",
+     requires = { "nvim-lua/plenary.nvim" },
+     config = function()
+       require( config_dir .. "rest" )
+     end
+   }
+   use {
+     'sindrets/diffview.nvim',
+   }
+   use {
+     'lewis6991/gitsigns.nvim',
+     config = function()
+       require( config_dir .. "gitsigns" )
+     end
+   }
+   use {
+     'edolphin-ydf/goimpl.nvim',
+     requires = {
+       {'nvim-lua/plenary.nvim'},
+       {'nvim-lua/popup.nvim'},
+       {'nvim-telescope/telescope.nvim'},
+       {'nvim-treesitter/nvim-treesitter'},
+     },
+     config = function()
+       require'telescope'.load_extension'goimpl'
+     end,
+   }
+   -- status bar --
+   use {
+     'feline-nvim/feline.nvim',
+     config = function ()
+       require('feline').setup()
+     end,
+   }
+   -- Themes
+   use {
+	 'morhetz/gruvbox',
+	 config = function()
+	 vim.cmd [[ colorscheme gruvbox ]]
+	 end
+   }
+   if PACKER_BOOTSTRAP then
+	   require("packer").sync()
+   end
 end,
   config = {
     display = {

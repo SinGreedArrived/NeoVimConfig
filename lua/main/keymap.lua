@@ -5,7 +5,7 @@ local ls = require("luasnip")
 
 cmd [[ set termguicolors ]]
 
-vim.keymap.set('n', ';ot', '<cmd>NvimTreeToggle<CR>', default_opts)
+vim.keymap.set('n', '<leader>ot', '<cmd>NvimTreeToggle<CR>', default_opts)
 
 -- LSP KEYMAPS --
 vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', default_opts)
@@ -37,7 +37,6 @@ vim.keymap.set('n', '<F7>', ":lua require('dap').set_breakpoint(vim.fn.input('Br
 vim.keymap.set('n', '<F8>', ":lua require('dap').toggle_breakpoint()<CR>", default_opts)
 vim.keymap.set('n', '<space>dr', ":lua require('dap').repl.open()<CR>", default_opts)
 vim.keymap.set('n', '<space>dt', ":lua require('dap-go').debug_test()<CR>", default_opts)
-vim.keymap.set('n', '<F11>', '<cmd>GoDebug --stop<CR>', default_opts)
 -- luasnip
 vim.keymap.set("n", "<F6>", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR><cmd>source ~/.config/nvim/lua/main/keymap.lua<CR>")
 

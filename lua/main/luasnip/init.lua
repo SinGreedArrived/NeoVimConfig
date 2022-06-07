@@ -183,7 +183,6 @@ ls.add_snippets("go", {
       [[
         func ({} {}{}) {}({}) ({}) {{ 
           {} 
-          {}
         }} 
       ]],{
         i(1, "obj"),
@@ -191,8 +190,7 @@ ls.add_snippets("go", {
         i(3, "same_object"),
         i(4, "MethodName"),
         i(5, "args ...interface{}"),
-        i(6),
-        i(7),
+        i(6, "error"),
         i(0),
       })),
     s("forr", fmt(

@@ -5,8 +5,7 @@ local ls = require("luasnip")
 
 cmd [[ set termguicolors ]]
 
-map('', '<F3>', '<cmd>NvimTreeToggle<CR>', default_opts)
-map('', '<S-F3>', '<cmd>NvimTreeRefresh<CR>', default_opts)
+vim.keymap.set('n', ';ot', '<cmd>NvimTreeToggle<CR>', default_opts)
 
 -- LSP KEYMAPS --
 vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', default_opts)
@@ -28,12 +27,19 @@ vim.api.nvim_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', d
 vim.api.nvim_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', default_opts)
-vim.api.nvim_set_keymap('n', '<F8>', '<cmd>GoBreakToggle<CR>', default_opts)
-vim.api.nvim_set_keymap('n', '<F10>', '<cmd>GoDebug --test<CR>', default_opts)
-vim.api.nvim_set_keymap('n', '<F11>', '<cmd>GoDebug --stop<CR>', default_opts)
-vim.api.nvim_set_keymap('n', '<F12>', '<cmd>GoAddTags<CR>', default_opts)
+
+-- DEBUG GOLANG --
+vim.keymap.set('n', '<F2>', ":lua require('dap').step_into()<CR>", default_opts)
+vim.keymap.set('n', '<F3>', ":lua require('dap').step_over()<CR>", default_opts)
+vim.keymap.set('n', '<F4>', ":lua require('dap').step_out()<CR>", default_opts)
+vim.keymap.set('n', '<F5>', ":lua require('dap').continue()<CR>", default_opts)
+vim.keymap.set('n', '<F7>', ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>", default_opts)
+vim.keymap.set('n', '<F8>', ":lua require('dap').toggle_breakpoint()<CR>", default_opts)
+vim.keymap.set('n', '<space>dr', ":lua require('dap').repl.open()<CR>", default_opts)
+vim.keymap.set('n', '<space>dt', ":lua require('dap-go').debug_test()<CR>", default_opts)
+vim.keymap.set('n', '<F11>', '<cmd>GoDebug --stop<CR>', default_opts)
 -- luasnip
-vim.keymap.set("n", "<F5>", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR><cmd>source ~/.config/nvim/lua/main/keymap.lua<CR>")
+vim.keymap.set("n", "<F6>", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR><cmd>source ~/.config/nvim/lua/main/keymap.lua<CR>")
 
 -- git
 vim.keymap.set('n', ';lg', '<cmd>LazyGit<CR>', default_opts)
@@ -84,9 +90,3 @@ vim.keymap.set('n', '<S-h>', '<cmd>BufferLineMovePrev<CR>', default_opts)
 -- quickfixlist
 vim.keymap.set('', '<c-n>', '<cmd>cnext<CR>', default_opts)
 vim.keymap.set('', '<c-p>', '<cmd>cprev<CR>', default_opts)
-
--- vim.api.nvim_set_keymap('i', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
--- vim.api.nvim_set_keymap('s', '<TAB>', '<Plug>luasnip-next-choice', default_opts)
-
--- Use a loop to conveniently call 'setup' on multiple servers and
--- map buffer local keybindings when the language server attaches

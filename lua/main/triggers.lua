@@ -6,5 +6,5 @@ local golang = vim.api.nvim_create_augroup("golang", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", { command = "silent! lua require('go.format').goimport()", group = golang, pattern = "*.go" })
 -- remembers group
 local remembers = vim.api.nvim_create_augroup("remembers", { clear = true })
-vim.api.nvim_create_autocmd("BufWinLeave", { command = "mkview", group = remembers, pattern = "*" })
-vim.api.nvim_create_autocmd("BufWinEnter", { command = "silent! loadview", group = remembers, pattern = "*" })
+vim.api.nvim_create_autocmd("BufWinLeave", { command = "silent! mkview", group = remembers, pattern = "*.*" })
+vim.api.nvim_create_autocmd("BufWinEnter", { command = "silent! loadview", group = remembers, pattern = "*.*" })

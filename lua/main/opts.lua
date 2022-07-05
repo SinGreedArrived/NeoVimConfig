@@ -53,3 +53,5 @@ vim.o.termguicolors = true
 --cmd "colorscheme sonokai"
 vim.o.mouse = 'a'
 vim.o.laststatus = 3
+vim.o.foldexpr='nvim_treesitter#foldexpr()'
+vim.o.foldmethod='expr'

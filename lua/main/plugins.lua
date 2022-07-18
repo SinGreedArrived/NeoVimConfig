@@ -145,6 +145,16 @@ return require("packer").startup {
         require( config_dir .. "rest" )
       end
     }
+		-- junegunn/fzf
+		use {
+			'junegunn/fzf', run = function ()
+				vim.fn['fzf#install']()
+			end
+		}
+		-- kevinhwang91/nvim-bqf
+		use {
+			'kevinhwang91/nvim-bqf', ft = 'qf'
+		}
     -- sindrets/diffview.nvim
     use {
       'sindrets/diffview.nvim',

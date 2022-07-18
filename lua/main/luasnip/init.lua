@@ -6,11 +6,13 @@ local snippet_from_nodes = ls.sn
 
 local types = require("luasnip.util.types")
 local s = ls.snippet
+local sn = ls.snippet_node
 local t = ls.text_node
 local i = ls.insert_node
 local f = ls.function_node
 local c = ls.choice_node
 local d = ls.dynamic_node
+local r = ls.restore_node
 local rep = require("luasnip.extras").rep
 local fmt = require("luasnip.extras.fmt").fmt
 
@@ -224,25 +226,20 @@ ls.add_snippets("go", {
         }
       ),
     })),
-    s("typs", fmt(
-    [[
-      type {} struct {{
-        {}
-      }}
-    ]], {
-      i(1),
-      i(0),
-    })),
-    s("typi", fmt(
-    [[
-      type {} interface {{
-        {}
-      }}
-    ]], {
-      i(1),
-      i(0),
-    })),
-    -- s({
+		s("typ", fmt(
+		[[
+			type {} {} {{
+				{}
+			}}
+		]],{
+			i(1, "TypeName"),
+			c(2, {
+				t("struct"),
+				t("interface"),
+			}),
+			i(0),
+		})),
+		-- s({
     --   trig = "ife",
     --   dscr = "check ftion error and return error wrap",
     -- },{
@@ -277,4 +274,4 @@ ls.add_snippets("go", {
 },{
     key = "go",
 })
-
+ 

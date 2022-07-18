@@ -37,10 +37,10 @@ vim.o.softtabstop = 2
 vim.bo.softtabstop = 2
 vim.o.shiftwidth = 2
 vim.bo.shiftwidth = 2
-vim.o.autoindent = true
-vim.bo.autoindent = true
-vim.o.expandtab = true
-vim.bo.expandtab = true
+-- vim.o.autoindent = true
+-- vim.bo.autoindent = true
+vim.o.expandtab = false
+vim.bo.expandtab = false
 
 vim.wo.list = true
 vim.o.listchars = 'tab:┆·,trail:·,precedes:,extends:'

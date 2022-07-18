@@ -5,7 +5,7 @@ local ls = require("luasnip")
 
 cmd [[ set termguicolors ]]
 
-vim.keymap.set('n', '<leader>ot', '<cmd>NvimTreeToggle<CR>', default_opts)
+vim.keymap.set('n', ';ot', '<cmd>NvimTreeToggle<CR>', default_opts)
 
 -- LSP KEYMAPS --
 vim.api.nvim_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc') -- Enable completion triggered by <c-x><c-o>
@@ -17,7 +17,7 @@ vim.api.nvim_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', def
 vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', default_opts)
 -- vim.api.nvim_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', default_opts)
-vim.api.nvim_set_keymap('n', 'gi', '<cmd>lua require(config_dir .. "lsp.handlers").implementation()<CR>', default_opts)
+vim.api.nvim_set_keymap('n', 'gi', '<cmd>lua require(config_dir .. "lsp_cnf.handlers").implementation()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', default_opts)
 vim.api.nvim_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', default_opts)
@@ -38,7 +38,7 @@ vim.keymap.set('n', '<F8>', ":lua require('dap').toggle_breakpoint()<CR>", defau
 vim.keymap.set('n', '<space>dr', ":lua require('dap').repl.open()<CR>", default_opts)
 vim.keymap.set('n', '<space>dt', ":lua require('dap-go').debug_test()<CR>", default_opts)
 -- luasnip
-vim.keymap.set("n", "<F6>", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR><cmd>source ~/.config/nvim/lua/main/keymap.lua<CR>")
+vim.keymap.set("n", "<F6>", "<cmd>source ~/.config/nvim/lua/main/luasnip/init.lua<CR><cmd>source ~/.config/nvim/lua/main/keymap.lua<CR><cmd>source ~/.config/nvim/lua/main/opts.lua<CR>")
 
 -- git
 vim.keymap.set('n', ';lg', '<cmd>LazyGit<CR>', default_opts)

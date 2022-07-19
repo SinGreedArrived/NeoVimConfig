@@ -6,6 +6,7 @@ local t = ls.t
 local d = ls.dynamic_node
 local c = ls.choice_node
 local f = ls.function_node
+local r = ls.restore_node
 local sn = ls.snippet_node
 
 local fmt = require("luasnip.extras.fmt").fmt
@@ -152,12 +153,16 @@ local append = s({trig="ap%s+(%w+)", regTrig = true, hidden = true}, fmt(
 }))
 table.insert(snippets, append)
 
-local func = s("fn", fmt(
+local func = s({trig="fn%s+(.+)", regTrig=true}, fmt(
 		[[
+			// {}
 			func {} {}({}) {} {{
 				{}
 			}}
 		]],{
+			f(function (index)
+				return index[1]
+			end, {2}),
 			c(1, {
 				t(""),
 				sn(nil, {
@@ -172,7 +177,9 @@ local func = s("fn", fmt(
 					t(")"),
 				}),
 			}),
-			i(2, "Function"),
+			d(2, function (_, snip)
+				return sn(1, i(1, snip.captures[1]))
+			end),
 			i(3),
 			c(4, {
 				sn(nil, {
@@ -187,6 +194,50 @@ local func = s("fn", fmt(
 			i(0),
 }))
 table.insert(snippets, func)
+
+
+local make_slice_or_map = s({ trig="make%s+(%S+)", regTrig=true}, fmt(
+	[[
+		{} := make({}{})
+	]], {
+		f(function (import)
+			local parts = vim.split(import[1][1], ".", true)
+			return parts[#parts]:gsub("^%u", string.lower)
+		end, {1}),
+		d(1, function (_, snip)
+			return sn(1, i(1, snip.captures[1]))
+		end),
+		c(2, {
+			sn(nil, {
+				i(1),
+			}),
+			sn(nil, {
+				t(","),
+				r(1, "lenArr", i(1,"0")),
+			}),
+			sn(nil, {
+				t(","),
+				r(1, "lenArr"),
+				t(","),
+				r(2, "alloc", i(1,"0")),
+			}),
+		})
+}))
+table.insert(snippets, make_slice_or_map)
+
+local var = s({ trig="var%s+(%S+)", regTrig=true}, fmt(
+	[[
+		var {} {}
+	]], {
+		f(function (import)
+			local parts = vim.split(import[1][1], ".", true)
+			return parts[#parts]:gsub("^%u", string.lower)
+		end, {1}),
+		d(1, function (_, snip)
+			return sn(1, i(1, snip.captures[1]))
+		end),
+}))
+table.insert(snippets, var)
 
 -- End Refactoring --
 

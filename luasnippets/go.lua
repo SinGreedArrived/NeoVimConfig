@@ -127,7 +127,7 @@ local if_err_check = s("ife-", fmt(
 		i(2, "obj"),
 		i(3, "Meth"),
 		i(4, "args"),
-		d(5, function (import)
+		d(0, function (import)
 			return sn(nil, {
 				i(1),
 				t([[, fmt.Errorf("]]),t(import[1][1]),t([[: %w", err)]])
@@ -223,6 +223,7 @@ table.insert(snippets, make_slice_or_map)
 local var = s({ trig="var%s+(%S+)", regTrig=true, hidden = true}, fmt(
 	[[
 		var {} {}
+		{}
 	]], {
 		f(function (import)
 			local parts = vim.split(import[1][1], ".", true)
@@ -231,12 +232,14 @@ local var = s({ trig="var%s+(%S+)", regTrig=true, hidden = true}, fmt(
 		d(1, function (_, snip)
 			return sn(1, i(1, snip.captures[1]))
 		end),
+		i(0),
 }))
 table.insert(snippets, var)
 
 local rerr = s({trig="rerr", regTrig=true}, fmt(
 	[[
 		{}.Require().{}
+		{}
 	]], {
 		i(1),
 		c(2, {
@@ -244,12 +247,13 @@ local rerr = s({trig="rerr", regTrig=true}, fmt(
 			t("Error(err)"),
 			sn(nil, {
 				t("ErrorIs("),
-				i(1,"expErr"),
+				i(1,"err"),
 				t(", "),
-				i(2, "err"),
+				i(2, "expErr"),
 				t(")"),
 			})
-		})
+		}),
+		i(0),
 }))
 table.insert(autosnippets, rerr)
 
@@ -258,6 +262,7 @@ local if_err = s({trig="ife"}, fmt(
 		if err != nil {{
 			return {}
 		}}
+		{}
 	]], {
 	c(1, {
 		sn(nil, {
@@ -269,7 +274,8 @@ local if_err = s({trig="ife"}, fmt(
 		sn(nil, {
 			i(1), t([[, fmt.Errorf("]]), r(2, "errFunc"), t([[: %w", err)]])
 		}),
-	})
+	}),
+	i(0),
 }))
 table.insert(snippets, if_err)
 -- End Refactoring --

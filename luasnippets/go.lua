@@ -244,9 +244,9 @@ local rerr = s({trig="rerr", regTrig=true}, fmt(
 			t("Error(err)"),
 			sn(nil, {
 				t("ErrorIs("),
-				i(1),
+				i(1,"expErr"),
 				t(", "),
-				i(2),
+				i(2, "err"),
 				t(")"),
 			})
 		})

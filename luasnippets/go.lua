@@ -69,6 +69,7 @@ local function cs(trigger, nodes, opts) --{{{
 	table.insert(target_table, snippet) -- insert snippet into appropriate table
 end --}}}
 
+
 -- Start Refactoring --
 local testmode = s("testmode", t("This is test mode") )
 table.insert(snippets, testmode)
@@ -116,21 +117,26 @@ local type = s("type", fmt(
 table.insert(autosnippets, type)
 
 
-local if_err_check = s("ife", fmt(
+local if_err_check = s("ife-", fmt(
 	[[
 		if {} := {}{}({}); err != nil {{
-			return fmt.Errorf("{}: %w", err)
+			return {}
 		}}
 	]], {
 		c(1, { t("_, err"), t("err")}),
 		i(2, "obj"),
 		i(3, "Meth"),
 		i(4, "args"),
-		rep(3),
+		d(5, function (import)
+			return sn(nil, {
+				i(1),
+				t([[, fmt.Errorf("]]),t(import[1][1]),t([[: %w", err)]])
+			})
+		end, {3} ),
 }))
 table.insert(snippets, if_err_check)
 
-local append = s({trig="ap%s+(%w+)", regTrig = true, hidden = true}, fmt(
+local append = s({trig="ap%s+(%S+)", regTrig = true, hidden = true}, fmt(
 	[[
 		{} = append({}, {})
 	]], {
@@ -142,7 +148,7 @@ local append = s({trig="ap%s+(%w+)", regTrig = true, hidden = true}, fmt(
 }))
 table.insert(snippets, append)
 
-local func = s({trig="fn%s+(.+)", regTrig=true}, fmt(
+local func = s({trig="fn%s+(.+)", regTrig=true, hidden=true}, fmt(
 		[[
 			// {}
 			func {} {}({}) {} {{
@@ -185,7 +191,7 @@ local func = s({trig="fn%s+(.+)", regTrig=true}, fmt(
 table.insert(snippets, func)
 
 
-local make_slice_or_map = s({ trig="make%s+(%S+)", regTrig=true}, fmt(
+local make_slice_or_map = s({ trig="make%s+(%S+)", regTrig=true, hidden = true}, fmt(
 	[[
 		{} := make({}{})
 	]], {
@@ -214,7 +220,7 @@ local make_slice_or_map = s({ trig="make%s+(%S+)", regTrig=true}, fmt(
 }))
 table.insert(snippets, make_slice_or_map)
 
-local var = s({ trig="var%s+(%S+)", regTrig=true}, fmt(
+local var = s({ trig="var%s+(%S+)", regTrig=true, hidden = true}, fmt(
 	[[
 		var {} {}
 	]], {
@@ -246,6 +252,26 @@ local rerr = s({trig="rerr", regTrig=true}, fmt(
 		})
 }))
 table.insert(autosnippets, rerr)
+
+local if_err = s({trig="ife"}, fmt(
+	[[
+		if err != nil {{
+			return {}
+		}}
+	]], {
+	c(1, {
+		sn(nil, {
+			i(1),
+		}),
+		sn(nil, {
+			t([[fmt.Errorf("]]),r(1, "errFunc", i(1, "errFunc")),t([[: %w", err)]])
+		}),
+		sn(nil, {
+			i(1), t([[, fmt.Errorf("]]), r(2, "errFunc"), t([[: %w", err)]])
+		}),
+	})
+}))
+table.insert(snippets, if_err)
 -- End Refactoring --
 
 return snippets, autosnippets

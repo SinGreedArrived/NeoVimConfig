@@ -1,10 +1,9 @@
 local ls = require "luasnip"
 local types = require("luasnip.util.types")
 
+require("luasnip.session.snippet_collection").clear_snippets "go"
 require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/luasnippets/" })
 
-
---require("luasnip.session.snippet_collection").clear_snippets "go"
 -- Every unspecified option will be set to the default.
 ls.config.set_config({
 	history = true,

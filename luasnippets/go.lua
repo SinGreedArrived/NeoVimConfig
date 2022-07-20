@@ -100,17 +100,6 @@ local forrange = s({ trig = "forr%s+(%S+)", regTrig = true, hidden = true }, fmt
 }))
 table.insert(snippets, forrange)
 
-local rerr = s({ trig = "rerr(%w+)", regTrig = true, hidden = true }, fmt(
-	[[
-		{}.Require().{}(err)
-	]], {
-		f(function (_, snip)
-			return snip.captures[1]
-		end),
-		c(1, { t("NoError"), t("Error") })
-}))
-table.insert(snippets, rerr)
-
 local type = s("type", fmt(
 	[[
 		type {} {} {{
@@ -239,6 +228,24 @@ local var = s({ trig="var%s+(%S+)", regTrig=true}, fmt(
 }))
 table.insert(snippets, var)
 
+local rerr = s({trig="rerr", regTrig=true}, fmt(
+	[[
+		{}.Require().{}
+	]], {
+		i(1),
+		c(2, {
+			t("NoError(err)"),
+			t("Error(err)"),
+			sn(nil, {
+				t("ErrorIs("),
+				i(1),
+				t(", "),
+				i(2),
+				t(")"),
+			})
+		})
+}))
+table.insert(autosnippets, rerr)
 -- End Refactoring --
 
 return snippets, autosnippets

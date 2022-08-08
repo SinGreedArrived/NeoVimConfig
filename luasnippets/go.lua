@@ -114,7 +114,7 @@ local type = s("type", fmt(
 		}),
 		i(0),
 }))
-table.insert(autosnippets, type)
+table.insert(snippets, type)
 
 
 local if_err_check = s("ife-", fmt(

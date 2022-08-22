@@ -151,10 +151,10 @@ return require("packer").startup {
 				vim.fn['fzf#install']()
 			end
 		}
-		-- kevinhwang91/nvim-bqf
-		use {
-			'kevinhwang91/nvim-bqf', ft = 'qf'
-		}
+		-- -- kevinhwang91/nvim-bqf
+		-- use {
+		-- 	'kevinhwang91/nvim-bqf', ft = 'qf'
+		-- }
     -- sindrets/diffview.nvim
     use {
       'sindrets/diffview.nvim',

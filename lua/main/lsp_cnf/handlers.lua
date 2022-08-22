@@ -8,7 +8,7 @@ M.implementation  = function ()
 
     if ft == "go" then
       local newResult = vim.tbl_filter(function (v)
-        return not string.find(v.uri, "mock.generated.go")
+        return not string.find(v.uri, ".pb.go")
       end, result)
 
       if #newResult > 0 then

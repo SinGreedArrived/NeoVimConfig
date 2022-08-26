@@ -1,14 +1,13 @@
-local cmd = vim.cmd             -- execute Vim commands
-local exec = vim.api.nvim_exec  -- execute Vimscript
-local g = vim.g                 -- global variables
-local opt = vim.opt             -- global/buffer/windows-scoped options
-
+-- local cmd = vim.cmd -- execute Vim commands
+-- local exec = vim.api.nvim_exec -- execute Vimscript
+local g = vim.g -- global variables
+local opt = vim.opt -- global/buffer/windows-scoped options
 
 g.ale_sign_error = '❌'
 g.ale_sign_warning = '⚠️'
 g.ale_fix_on_save = 1
 
-opt.colorcolumn = '80'
+opt.colorcolumn = '120'
 opt.cursorline = true
 
 vim.o.ruler = false
@@ -45,13 +44,13 @@ vim.bo.expandtab = false
 vim.wo.list = true
 vim.o.listchars = 'tab:┆·,trail:·,precedes:,extends:'
 
-vim.g.markdown_fenced_languages = {'zsh', 'nvim', 'go' }
+vim.g.markdown_fenced_languages = {'zsh', 'nvim', 'go'}
 
 vim.g.termbufm_direction_cmd = 'new'
 
 vim.o.termguicolors = true
---cmd "colorscheme sonokai"
+-- cmd "colorscheme sonokai"
 vim.o.mouse = 'a'
 vim.o.laststatus = 3
-vim.o.foldexpr='nvim_treesitter#foldexpr()'
-vim.o.foldmethod='expr'
+vim.o.foldexpr = 'nvim_treesitter#foldexpr()'
+vim.o.foldmethod = 'expr'

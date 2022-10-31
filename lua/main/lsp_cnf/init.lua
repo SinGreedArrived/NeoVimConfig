@@ -51,4 +51,5 @@ nvim_config.rust_analyzer.setup {}
 nvim_config.sqlls.setup {}
 nvim_config.dockerls.setup {}
 nvim_config.phpactor.setup {}
+nvim_config.sqls.setup {}
 require(config_dir .. "lsp_cnf.handlers")

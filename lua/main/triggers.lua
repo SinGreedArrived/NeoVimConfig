@@ -1,3 +1,4 @@
+M = {}
 -- packer group
 local plugins_sync = vim.api.nvim_create_augroup("packer_sync_plugins",
                                                  {clear = true})
@@ -33,3 +34,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*.lua",
     command = "silent! call LuaFormat()"
 })
+
+M.golang = golang
+M.lua = lua
+
+return M

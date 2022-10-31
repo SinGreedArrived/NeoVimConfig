@@ -1,8 +1,9 @@
+local groups = require "main.triggers"
 -- golang group
-local attach_to_buffer = function(output_bufnr, command)
+local attach_to_buffer = function(output_bufnr, pattern, command)
     vim.api.nvim_create_autocmd("BufWritePost", {
-        group = golang,
-        pattern = "*.go",
+        group = groups.golang,
+        pattern = pattern,
         callback = function()
             local append_data = function(_, data)
                 if data then
@@ -21,3 +22,7 @@ local attach_to_buffer = function(output_bufnr, command)
         end
     })
 end
+
+vim.api.nvim_create_user_command("AutoRun",
+                                 function() print("AutoRun start now...") end,
+                                 {})

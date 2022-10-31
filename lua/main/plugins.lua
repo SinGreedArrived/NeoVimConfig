@@ -132,6 +132,22 @@ return require("packer").startup {
                 require'telescope'.load_extension 'goimpl'
             end
         }
+        -- Database
+        -- use {
+        --     "tpope/vim-dadbod",
+        --     opt = true,
+        --     requires = {
+        --         "kristijanhusak/vim-dadbod-ui",
+        --         "kristijanhusak/vim-dadbod-completion"
+        --     },
+        --     config = function()
+        --         require(config_dir .. "database").setup()
+        --     end,
+        --     cmd = {
+        --         "DBUIToggle", "DBUI", "DBUIAddConnection", "DBUIFindBuffer",
+        --         "DBUIRenameBuffer", "DBUILastQueryInfo"
+        --     }
+        -- }
         -- anuvyklack/pretty-fold.nvim
         use {
             'anuvyklack/pretty-fold.nvim',

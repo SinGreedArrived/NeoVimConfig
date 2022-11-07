@@ -85,15 +85,15 @@ local forrange = s({trig = "forr%s+(%S+)", regTrig = true, hidden = true},
 }))
 table.insert(snippets, forrange)
 
-local type = s({trig = "type%s+(%S+)", regTrig = true, hidden = true}, fmt([[
-		type {} {} {{
-			{}
-		}}
-	]], {
-    d(1, function(_, snip) return sn(1, i(1, snip.captures[1])) end),
-    c(2, {t("struct"), t("interface")}), i(0)
-}))
-table.insert(snippets, type)
+-- local type = s({trig = "type%s+(%S+)", regTrig = true, hidden = true}, fmt([[
+-- 		type {} {} {{
+-- 			{}
+-- 		}}
+-- 	]], {
+--     d(1, function(_, snip) return sn(1, i(1, snip.captures[1])) end),
+--     c(2, {t("struct"), t("interface")}), i(0)
+-- }))
+-- table.insert(snippets, type)
 
 local if_err_check = s("ife-", fmt([[
 		if {} := {}{}({}); err != nil {{
@@ -187,6 +187,33 @@ local if_err = s({trig = "ife"}, fmt([[
     })
 }))
 table.insert(snippets, if_err)
+
+local baseRepo = s({trig = "baseRepo"}, fmt([[
+	// {} repository.
+	type {} struct {{
+		db *sqlx.DB
+	}}
+
+	// New{} return {} repository.
+	func New{}(
+		db *sqlx.DB,
+	) {} {{
+		return {}{{
+			db:db,
+		}}
+	}}
+]], {i(1, "RepoName"), rep(1), rep(1), rep(1), rep(1), rep(1), rep(1)}))
+table.insert(snippets, baseRepo)
+
+local dbIntToString = s({trig = "dbIntToString"}, fmt([[
+	type {} int64
+	
+	// Value.
+	func ({} {}) Value() value.{} {{
+		return value.New{}(strconv.FormatInt(int64({}), 10))
+	}}
+]], {i(1, "FieldName"), i(2, "i"), rep(1), rep(1), rep(1), rep(2)}))
+table.insert(snippets, dbIntToString)
 -- End Refactoring --
 
 return snippets, autosnippets

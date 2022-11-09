@@ -371,6 +371,58 @@ local baseService = s(
 )
 table.insert(snippets, baseService)
 
+-- PSS admin methods
+local PSSService = s({ trig = "PSSService" },
+	fmt([[
+		func (s Service) {}ByID(
+			ctx context.Context,
+			id string,
+		) (entity.{}, error) {
+			return s.{}Repo.{}ByID(ctx, id)
+		}
+		
+		func (s Service) {}s(ctx context.Context) ([]entity.{}, error) {
+			return s.{}Repo.{}s(ctx)
+		}
+		
+		func (s Service) Create{}(
+			ctx context.Context,
+			{} entity.{},
+		) (entity.{}, error) {
+			return s.{}Repo.Create{}(ctx, {})
+		}
+		
+		func (s Service) Update{}(ctx context.Context, {} entity.{}) (entity.MethodGroup, error) {
+			return s.{}Repo.Update{}(ctx, mg)
+		}
+		
+		func (s Service) Delete{}(ctx context.Context, id string) error {
+			return s.{}Repo.Delete{}(ctx, id)
+		}
+	]], {
+		i(1, "ENTITY"),
+		rep(1),
+		i(1, "entity"),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1),
+		rep(1)
+	}))
 -- End Refactoring --
 
 return snippets, autosnippets

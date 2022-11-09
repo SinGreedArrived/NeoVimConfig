@@ -32,7 +32,7 @@ local lua = vim.api.nvim_create_augroup("lua", {clear = true})
 vim.api.nvim_create_autocmd("BufWritePre", {
     group = lua,
     pattern = "*.lua",
-    command = "silent! call LuaFormat()"
+    command = "silent! FormatWrite"
 })
 
 M.golang = golang

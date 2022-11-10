@@ -377,14 +377,14 @@ local pss_service = s(
 	fmt(
 		[[
 		type {}Repo interface {{
-			{}ByID(ctx context.Context, id string) (entity.{u}, error)
+			{u}ByID(ctx context.Context, id string) (entity.{u}, error)
 			{u}s(ctx context.Context) ([]entity.{u}, error)
 			Create{u}(ctx context.Context, {} entity.{u},) (entity.{u}, error)
 			Update{u}(ctx context.Context, {arg} entity.{u},) (entity.{u}, error)
 			Delete{u}(ctx context.Context, id string,) error
 		}}
 
-		// {u}ByID returns {l} by id.
+		// {u}ByID returns {} by id.
 		func (s Service) {u}ByID(
 			ctx context.Context,
 			id string,
@@ -408,15 +408,15 @@ local pss_service = s(
 
 		// Update{u} updates {l}.
 		func (s Service) Update{u}(
-			ctx context.Context, 
+			ctx context.Context,
 			{arg} entity.{u},
 		) (entity.{u}, error) {{
-			return s.{l}Repo.Update{u}(ctx, mg)
+			return s.{l}Repo.Update{u}(ctx, {arg})
 		}}
 
 		// Delete{u} deletes {l}.
 		func (s Service) Delete{u}(
-			ctx context.Context, 
+			ctx context.Context,
 			id string,
 		) error {{
 			return s.{l}Repo.Delete{u}(ctx, id)
@@ -432,18 +432,21 @@ local pss_service = s(
 		}
 	)
 )
-table.insert(snippets, pss_service )
+table.insert(snippets, pss_service)
 
-local pss_repo = s({trig= "pss-repo"}, fmt([[
+local pss_repo = s(
+	{ trig = "pss-repo" },
+	fmt(
+		[[
 	// {}ByID returns {} by id.
 	func ({} {u}) {u}ByID(ctx context.Context, id string) (entity.{u}, error) {{
 		var res entity.{u}
 
-		if err := c.db.GetContext(
-			ctx, 
-			&res, 
+		if err := {s}.db.GetContext(
+			ctx,
+			&res,
 			`
-			`, 
+			`,
 			id,
 		); err != nil {{
 			if errors.Is(err, sql.ErrNoRows) {{
@@ -452,58 +455,58 @@ local pss_repo = s({trig= "pss-repo"}, fmt([[
 
 			return res, fmt.Errorf("db.GetContext: %w", err)
 		}}
-	
-		return res, err
+
+		return res, nil
 	}}
-	
+
 	// {u}s returns all {l}.
 	func ({s} {u}) {u}s(ctx context.Context) ([]entity.{u}, error) {{
 		var res []entity.{u}
 
-		if err := c.db.SelectContext(
-			ctx, 
-			&res, 
+		if err := {s}.db.SelectContext(
+			ctx,
+			&res,
 			`
 			`,
 		); err != nil {{
-			return nil, fmt.Error("db.SelectContext: %w", err)
+			return nil, fmt.Errorf("db.SelectContext: %w", err)
 		}}
-	
+
 		return res, nil
 	}}
-	
+
 	// Create{u} creates {l}.
 	func ({s} {u}) Create{u}(ctx context.Context, {} entity.{u}) (entity.{u}, error) {{
 		{arg}.ID = entity.GenerateUID()
 
-		if _, err := c.db.NamedExecContext(
-			ctx, 
-			``, 
+		if _, err := {s}.db.NamedExecContext(
+			ctx,
+			``,
 			{arg},
 		); err != nil {{
-			return entity.{u}, fmt.Errorf("db.NamedExecContext: %w", err)
+			return entity.{u}{{}}, fmt.Errorf("db.NamedExecContext: %w", err)
 		}}
-	
-		return cf, nil
+
+		return {arg}, nil
 	}}
-	
+
 	// Update{u} updates {l}.
 	func ({s} {u}) Update{u}(ctx context.Context, {arg} entity.{u}) error {{
-		if _, err := c.db.NamedExecContext(
-			ctx, 
+		if _, err := {s}.db.NamedExecContext(
+			ctx,
 			``,
 			{arg},
 		); err != nil {{
 			return fmt.Errorf("db.NamedExecContext: %w", err)
 		}}
-	
+
 		return nil
 	}}
-	
+
 	// Delete{u} deletes {l}.
 	func ({s} {u}) Delete{u}(ctx context.Context, id string) error {{
-		if _, err := c.db.ExecContext(
-			ctx, 
+		if _, err := {s}.db.ExecContext(
+			ctx,
 			`
 			`,
 			id,
@@ -513,16 +516,19 @@ local pss_repo = s({trig= "pss-repo"}, fmt([[
 
 		return nil
 	}}
-]], {
-	i(1, "ENITITY"),
-	i(2, "enitity"),
-	i(3, "r"),
-	i(4, "arg"),
-	u = rep(1),
-	l = rep(2),
-	s = rep(3),
-	arg = rep(4),
-}))
+]],
+		{
+			i(1, "ENITITY"),
+			i(2, "enitity"),
+			i(3, "r"),
+			i(4, "arg"),
+			u = rep(1),
+			l = rep(2),
+			s = rep(3),
+			arg = rep(4),
+		}
+	)
+)
 table.insert(snippets, pss_repo)
 -- End Refactoring --
 

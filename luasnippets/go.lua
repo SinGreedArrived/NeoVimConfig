@@ -373,63 +373,157 @@ table.insert(snippets, baseService)
 
 -- PSS admin methods
 local pss_service = s(
-	{ trig = "PSSService" },
+	{ trig = "pss_service" },
 	fmt(
 		[[
-		func (s Service) {}ByID(
+		type {}Repo interface {{
+			{}ByID(ctx context.Context, id string) (entity.{u}, error)
+			{u}s(ctx context.Context) ([]entity.{u}, error)
+			Create{u}(ctx context.Context, {} entity.{u},) (entity.{u}, error)
+			Update{u}(ctx context.Context, {arg} entity.{u},) (entity.{u}, error)
+			Delete{u}(ctx context.Context, id string,) error
+		}}
+
+		// {u}ByID returns {l} by id.
+		func (s Service) {u}ByID(
 			ctx context.Context,
 			id string,
-		) (entity.{}, error) {{
-			return s.{}Repo.{}ByID(ctx, id)
+		) (entity.{u}, error) {{
+			return s.{l}Repo.{u}ByID(ctx, id)
 		}}
 
-		func (s Service) {}s(ctx context.Context) ([]entity.{}, error) {{
-			return s.{}Repo.{}s(ctx)
+
+		// {u}s returns all {l}.
+		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
+			return s.{l}Repo.{u}s(ctx)
 		}}
 
-		func (s Service) Create{}(
+		// Create{u} creates {l}.
+		func (s Service) Create{u}(
 			ctx context.Context,
-			{} entity.{},
-		) (entity.{}, error) {{
-			return s.{}Repo.Create{}(ctx, {})
+			{arg} entity.{u},
+		) (entity.{u}, error) {{
+			return s.{l}Repo.Create{u}(ctx, {arg})
 		}}
 
-		func (s Service) Update{}(ctx context.Context, {} entity.{}) (entity.MethodGroup, error) {{
-			return s.{}Repo.Update{}(ctx, mg)
+		// Update{u} updates {l}.
+		func (s Service) Update{u}(
+			ctx context.Context, 
+			{arg} entity.{u},
+		) (entity.{u}, error) {{
+			return s.{l}Repo.Update{u}(ctx, mg)
 		}}
 
-		func (s Service) Delete{}(ctx context.Context, id string) error {{
-			return s.{}Repo.Delete{}(ctx, id)
+		// Delete{u} deletes {l}.
+		func (s Service) Delete{u}(
+			ctx context.Context, 
+			id string,
+		) error {{
+			return s.{l}Repo.Delete{u}(ctx, id)
 		}}
 ]],
 		{
-			i(1, "ENTITY"),
-			rep(1),
+			i(1, "Entity"),
 			i(2, "entity"),
-			rep(1),
-			rep(1),
-			rep(1),
-			rep(2),
-			rep(1),
-			rep(1),
-			i(3, arg),
-			rep(1),
-			rep(1),
-			rep(2),
-			rep(1),
-			rep(3),
-			rep(1),
-			rep(3),
-			rep(1),
-			rep(2),
-			rep(1),
-			rep(1),
-			rep(2),
-			rep(1),
+			i(3, "arg"),
+			u = rep(1),
+			l = rep(2),
+			arg = rep(3),
 		}
 	)
 )
 table.insert(snippets, pss_service )
+
+local pss_repo = s({trig= "pss-repo"}, fmt([[
+	// {}ByID returns {} by id.
+	func ({} {u}) {u}ByID(ctx context.Context, id string) (entity.{u}, error) {{
+		var res entity.{u}
+
+		if err := c.db.GetContext(
+			ctx, 
+			&res, 
+			`
+			`, 
+			id,
+		); err != nil {{
+			if errors.Is(err, sql.ErrNoRows) {{
+				return res, failure.NewNotFoundError(fmt.Sprintf("{l} id %v", id))
+			}}
+
+			return res, fmt.Errorf("db.GetContext: %w", err)
+		}}
+	
+		return res, err
+	}}
+	
+	// {u}s returns all {l}.
+	func ({s} {u}) {u}s(ctx context.Context) ([]entity.{u}, error) {{
+		var res []entity.{u}
+
+		if err := c.db.SelectContext(
+			ctx, 
+			&res, 
+			`
+			`,
+		); err != nil {{
+			return nil, fmt.Error("db.SelectContext: %w", err)
+		}}
+	
+		return res, nil
+	}}
+	
+	// Create{u} creates {l}.
+	func ({s} {u}) Create{u}(ctx context.Context, {} entity.{u}) (entity.{u}, error) {{
+		{arg}.ID = entity.GenerateUID()
+
+		if _, err := c.db.NamedExecContext(
+			ctx, 
+			``, 
+			{arg},
+		); err != nil {{
+			return entity.{u}, fmt.Errorf("db.NamedExecContext: %w", err)
+		}}
+	
+		return cf, nil
+	}}
+	
+	// Update{u} updates {l}.
+	func ({s} {u}) Update{u}(ctx context.Context, {arg} entity.{u}) error {{
+		if _, err := c.db.NamedExecContext(
+			ctx, 
+			``,
+			{arg},
+		); err != nil {{
+			return fmt.Errorf("db.NamedExecContext: %w", err)
+		}}
+	
+		return nil
+	}}
+	
+	// Delete{u} deletes {l}.
+	func ({s} {u}) Delete{u}(ctx context.Context, id string) error {{
+		if _, err := c.db.ExecContext(
+			ctx, 
+			`
+			`,
+			id,
+		); err != nil {{
+			return fmt.Errorf("db.ExecContext: %w", err)
+		}}
+
+		return nil
+	}}
+]], {
+	i(1, "ENITITY"),
+	i(2, "enitity"),
+	i(3, "r"),
+	i(4, "arg"),
+	u = rep(1),
+	l = rep(2),
+	s = rep(3),
+	arg = rep(4),
+}))
+table.insert(snippets, pss_repo)
 -- End Refactoring --
 
 return snippets, autosnippets

@@ -377,17 +377,17 @@ local pss_service = s(
 	fmt(
 		[[
 		type {}Repo interface {{
-			{u}ByID(ctx context.Context, id string) (entity.{u}, error)
+			{}ByID(ctx context.Context, id string) (entity.{u}, error)
 			{u}s(ctx context.Context) ([]entity.{u}, error)
-			Create{u}(ctx context.Context, {} entity.{u},) (entity.{u}, error)
-			Update{u}(ctx context.Context, {arg} entity.{u},) (entity.{u}, error)
+			Create{u}(ctx context.Context, {l} entity.{u},) (entity.{u}, error)
+			Update{u}(ctx context.Context, {l} entity.{u},) (entity.{u}, error)
 			Delete{u}(ctx context.Context, id string,) error
 		}}
 
-		// {u}ByID returns {} by id.
+		// {u}ByID returns {l} by id.
 		func (s Service) {u}ByID(
 			ctx context.Context,
-			id string,
+			id value.{u},
 		) (entity.{u}, error) {{
 			return s.{l}Repo.{u}ByID(ctx, id)
 		}}
@@ -395,40 +395,38 @@ local pss_service = s(
 
 		// {u}s returns all {l}.
 		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
-			return s.{l}Repo.{u}s(ctx)
+			return s.{l}Repo.{u}(ctx)
 		}}
 
 		// Create{u} creates {l}.
 		func (s Service) Create{u}(
 			ctx context.Context,
-			{arg} entity.{u},
+			{l} entity.{u},
 		) (entity.{u}, error) {{
-			return s.{l}Repo.Create{u}(ctx, {arg})
+			return s.{l}Repo.Create{u}(ctx, {l})
 		}}
 
 		// Update{u} updates {l}.
 		func (s Service) Update{u}(
 			ctx context.Context,
-			{arg} entity.{u},
+			{l} entity.{u},
 		) (entity.{u}, error) {{
-			return s.{l}Repo.Update{u}(ctx, {arg})
+			return s.{l}Repo.Update{u}(ctx, {l})
 		}}
 
 		// Delete{u} deletes {l}.
 		func (s Service) Delete{u}(
 			ctx context.Context,
-			id string,
+			id value.{u},
 		) error {{
 			return s.{l}Repo.Delete{u}(ctx, id)
 		}}
 ]],
 		{
-			i(1, "Entity"),
-			i(2, "entity"),
-			i(3, "arg"),
-			u = rep(1),
-			l = rep(2),
-			arg = rep(3),
+			i(1, "entity"),
+			i(2, "Entity"),
+			u = rep(2),
+			l = rep(1),
 		}
 	)
 )
@@ -476,26 +474,26 @@ local pss_repo = s(
 	}}
 
 	// Create{u} creates {l}.
-	func ({s} {u}) Create{u}(ctx context.Context, {} entity.{u}) (entity.{u}, error) {{
-		{arg}.ID = entity.GenerateUID()
+	func ({s} {u}) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
+		{l}.ID = entity.GenerateUID()
 
 		if _, err := {s}.db.NamedExecContext(
 			ctx,
 			``,
-			{arg},
+			{l},
 		); err != nil {{
 			return entity.{u}{{}}, fmt.Errorf("db.NamedExecContext: %w", err)
 		}}
 
-		return {arg}, nil
+		return {l}, nil
 	}}
 
 	// Update{u} updates {l}.
-	func ({s} {u}) Update{u}(ctx context.Context, {arg} entity.{u}) error {{
+	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) error {{
 		if _, err := {s}.db.NamedExecContext(
 			ctx,
 			``,
-			{arg},
+			{l},
 		); err != nil {{
 			return fmt.Errorf("db.NamedExecContext: %w", err)
 		}}
@@ -521,15 +519,87 @@ local pss_repo = s(
 			i(1, "ENITITY"),
 			i(2, "enitity"),
 			i(3, "r"),
-			i(4, "arg"),
 			u = rep(1),
 			l = rep(2),
 			s = rep(3),
-			arg = rep(4),
 		}
 	)
 )
 table.insert(snippets, pss_repo)
+
+local pss_grpc = s(
+	{ trig = "pss_grpc" },
+	fmt(
+		[[
+type {}Service interface {{
+	{}ByID(ctx context.Context, id string) (entity.{u}, error)
+	{u}s(ctx context.Context) ([]entity.{u}, error)
+	Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+	Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+	Delete{u}(ctx context.Context, id string) error
+}}
+
+func (s Server) Get{u}(ctx context.Context, r *pb.Get{u}Request) (*pb.{u}, error) {{
+	c, err := s.{l}Service.{u}ByID(ctx, r.Id)
+	if err != nil {{
+		return nil, fmt.Errorf("{l}Service.{u}ByID: %w", err)
+	}}
+
+	return newProtobufValueFromi{u}(c), nil
+}}
+
+func (s Server) List{u}s(ctx context.Context, _ *emptypb.Empty) (*pb.List{u}sResponse, error) {{
+	c, err := s.{l}Service.{u}s(ctx)
+	if err != nil {{
+		return nil, fmt.Errorf("{l}Service.{u}s: %w", err)
+	}}
+
+	return &pb.List{u}sResponse{{
+		{u}s: newProtobufValueFrom{u}s(c),
+	}}, nil
+}}
+
+func (s Server) Create{u}(ctx context.Context, r *pb.Create{u}Request) (*pb.{u}, error) {{
+	c := new{u}FromCreateRequest(r)
+
+	res, err := s.{l}Service.Create{u}(ctx, c)
+	if err != nil {{
+		return nil, fmt.Errorf("{l}Service.Create{u}: %w", err)
+	}}
+
+	return newProtobufValueFrom{u}(res), nil
+}}
+
+func (s Server) Update{u}(ctx context.Context, r *pb.Update{u}Request) (*pb.{u}, error) {{
+	c := new{u}FromUpdateRequest(r)
+
+	{l}, err := s.{l}Service.Update{u}(ctx, c)
+	if err != nil {{
+		return nil, fmt.Errorf("{l}Service.Update{u}: %w", err)
+	}}
+
+	return newProtobufValueFrom{u}({l}), nil
+}}
+
+func (s Server) Delete{u}(ctx context.Context, r *pb.Delete{u}Request) (*emptypb.Empty, error) {{
+	err := s.{l}Service.Delete{u}(ctx, r.Id)
+	if err != nil {{
+		return nil, fmt.Errorf("{l}Service.Delete{u}: %w", err)
+	}}
+
+	return &emptypb.Empty{{}}, nil
+}}
+]],
+
+		{
+			i(1, "entity"),
+			i(2, "ENTITY"),
+			u = rep(2),
+			l = rep(1),
+		}
+	)
+)
+table.insert(snippets, pss_grpc)
 -- End Refactoring --
 
 return snippets, autosnippets

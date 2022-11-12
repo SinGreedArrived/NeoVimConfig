@@ -377,25 +377,25 @@ local pss_service = s(
 	fmt(
 		[[
 		type {}Repo interface {{
-			{}ByID(ctx context.Context, id string) (entity.{u}, error)
+			{}ByID(ctx context.Context, id value.{u}ID) (entity.{u}, error)
 			{u}s(ctx context.Context) ([]entity.{u}, error)
-			Create{u}(ctx context.Context, {l} entity.{u},) (entity.{u}, error)
-			Update{u}(ctx context.Context, {l} entity.{u},) (entity.{u}, error)
-			Delete{u}(ctx context.Context, id string,) error
+			Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+			Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+			Delete{u}(ctx context.Context, id value.{u}ID) error
 		}}
 
 		// {u}ByID returns {l} by id.
 		func (s Service) {u}ByID(
 			ctx context.Context,
-			id value.{u},
+			id string,
 		) (entity.{u}, error) {{
-			return s.{l}Repo.{u}ByID(ctx, id)
+			return s.{l}Repo.{u}ByID(ctx, value.{u}ID(id))
 		}}
 
 
 		// {u}s returns all {l}.
 		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
-			return s.{l}Repo.{u}(ctx)
+			return s.{l}Repo.{u}s(ctx)
 		}}
 
 		// Create{u} creates {l}.
@@ -417,9 +417,9 @@ local pss_service = s(
 		// Delete{u} deletes {l}.
 		func (s Service) Delete{u}(
 			ctx context.Context,
-			id value.{u},
+			id string,
 		) error {{
-			return s.{l}Repo.Delete{u}(ctx, id)
+			return s.{l}Repo.Delete{u}(ctx, value.{u}ID(id))
 		}}
 ]],
 		{
@@ -475,7 +475,7 @@ local pss_repo = s(
 
 	// Create{u} creates {l}.
 	func ({s} {u}) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
-		{l}.ID = entity.GenerateUID()
+		{l}.ID = value.{u}ID(entity.GenerateUID())
 
 		if _, err := {s}.db.NamedExecContext(
 			ctx,
@@ -489,7 +489,7 @@ local pss_repo = s(
 	}}
 
 	// Update{u} updates {l}.
-	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) error {{
+	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
 		if _, err := {s}.db.NamedExecContext(
 			ctx,
 			``,
@@ -545,7 +545,7 @@ func (s Server) Get{u}(ctx context.Context, r *pb.Get{u}Request) (*pb.{u}, error
 		return nil, fmt.Errorf("{l}Service.{u}ByID: %w", err)
 	}}
 
-	return newProtobufValueFromi{u}(c), nil
+	return newProtobufValueFrom{u}(c), nil
 }}
 
 func (s Server) List{u}s(ctx context.Context, _ *emptypb.Empty) (*pb.List{u}sResponse, error) {{

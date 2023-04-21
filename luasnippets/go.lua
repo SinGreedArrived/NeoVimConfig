@@ -70,54 +70,40 @@ local function cs(trigger, nodes, opts) -- {{{
 	table.insert(target_table, snippet) -- insert snippet into appropriate table
 end -- }}}
 
+local firstChar = function(args)
+	local firstChar = string.lower(args[1][1]:sub(1, 1))
+	return sn(nil, {
+		t(firstChar),
+	})
+end
+
+local lowerStart = function(args)
+	local lowerCase = args[1][1]:gsub("%a", string.lower, 1)
+	return sn(nil, {
+		t(lowerCase),
+	})
+end
+
+local upperStart = function(args)
+	local upperCase = args[1][1]:gsub("%a", string.upper, 1)
+	return sn(nil, {
+		t(upperCase),
+	})
+end
+
 -- Start Refactoring --
 local testmode = s("testmode", t("This is test mode"))
 table.insert(snippets, testmode)
 
-local forrange = s(
-	{ trig = "forr(%S+)", regTrig = true, hidden = true },
-	fmt(
-		[[
-		for {} := range {} {{
-			{}
-		}}
-	]],
-		{
-			c(1, {
-				sn(1, { i(1, "i") }),
-				sn(1, { t("_, "), i(1, "v") }),
-				sn(1, { i(1, "i"), t(", "), i(2, "v") }),
-			}),
-			f(function(_, snip)
-				return snip.captures[1]
-			end),
-			i(0),
-		}
-	)
-)
-table.insert(snippets, forrange)
-
--- local type = s({trig = "type%s+(%S+)", regTrig = true, hidden = true}, fmt([[
--- 		type {} {} {{
--- 			{}
--- 		}}
--- 	]], {
---     d(1, function(_, snip) return sn(1, i(1, snip.captures[1])) end),
---     c(2, {t("struct"), t("interface")}), i(0)
--- }))
--- table.insert(snippets, type)
-
 local append = s(
-	{ trig = "ap%s+(%S+)", regTrig = true, hidden = true },
+	{ trig = "ap", regTrig = true, hidden = true },
 	fmt(
 		[[
-		{} = append({}, {})
+		{ArrRep} = append({Arr}, {})
 	]],
 		{
-			d(1, function(_, snip)
-				return sn(nil, i(1, snip.captures[1]))
-			end),
-			rep(1),
+			Arr = i(1),
+			ArrRep = rep(1),
 			i(0),
 		}
 	)
@@ -128,7 +114,7 @@ local func = s(
 	{ trig = "fn%s+(.+)", regTrig = true, hidden = true },
 	fmt(
 		[[
-			// {}
+			// {} ...
 			func {} {}({}) {} {{
 				{}
 			}}
@@ -139,7 +125,7 @@ local func = s(
 			end, { 2 }),
 			c(1, {
 				t(""),
-				sn(nil, { t("("), i(1), t(" "), c(2, { t(""), t("*") }), i(3), t(")") }),
+				sn(nil, { t("("), i(1), t(" "), i(2), t(")") }),
 			}),
 			d(2, function(_, snip)
 				return sn(1, i(1, snip.captures[1]))
@@ -221,7 +207,7 @@ local rerr = s(
 table.insert(autosnippets, rerr)
 
 local baseRepo = s(
-	{ trig = "sRepo" },
+	{ trig = "baseRepo" },
 	fmt(
 		[[
 	// {RepoName} repository.
@@ -246,47 +232,9 @@ local baseRepo = s(
 )
 table.insert(snippets, baseRepo)
 
-local dbIntToValue = s(
-	{ trig = "dbIntToValue" },
-	fmt(
-		[[
-	type {} int64
-
-	// Value.
-	func ({} {}) Value() value.{} {{
-		return value.New{}(strconv.FormatInt(int64({}), 10))
-	}}
-
-	func ({} *{}) ValuePtr() *value.{} {{
-		if {} == nil {{
-			return nil
-		}}
-
-		return &{}.Value()
-	}}
-	{}
-]],
-		{
-			i(1, "TypeName"),
-			i(2, "i"),
-			rep(1),
-			rep(1),
-			rep(1),
-			rep(2),
-			rep(2),
-			rep(1),
-			rep(1),
-			rep(2),
-			rep(2),
-			i(0),
-		}
-	)
-)
-table.insert(snippets, dbIntToValue)
-
 -- baseService
 local baseService = s(
-	{ trig = "sService" },
+	{ trig = "baseService" },
 	fmt(
 		[[
 	// Service.
@@ -313,225 +261,6 @@ local baseService = s(
 	)
 )
 table.insert(snippets, baseService)
-
--- PSS admin methods local pss_service = s( { trig = "pss_service" }, fmt( [[ type {}Repo interface {{ {}ByID(ctx context.Context, id value.{u}ID) (entity.{u}, error) {u}s(ctx context.Context) ([]entity.{u}, error) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) Delete{u}(ctx context.Context, id value.{u}ID) error }} // {u}ByID returns {l} by id. func (s Service) {u}ByID( ctx context.Context, id string,) (entity.{u}, error) {{ return s.{l}Repo.{u}ByID(ctx, value.{u}ID(id)) }}
---
---
--- 		// {u}s returns all {l}.
--- 		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
--- 			return s.{l}Repo.{u}s(ctx)
--- 		}}
---
--- 		// Create{u} creates {l}.
--- 		func (s Service) Create{u}(
--- 			ctx context.Context,
--- 			{l} entity.{u},
--- 		) (entity.{u}, error) {{
--- 			return s.{l}Repo.Create{u}(ctx, {l})
--- 		}}
---
--- 		// Update{u} updates {l}.
--- 		func (s Service) Update{u}(
--- 			ctx context.Context,
--- 			{l} entity.{u},
--- 		) (entity.{u}, error) {{
--- 			return s.{l}Repo.Update{u}(ctx, {l})
--- 		}}
---
--- 		// Delete{u} deletes {l}.
--- 		func (s Service) Delete{u}(
--- 			ctx context.Context,
--- 			id string,
--- 		) error {{
--- 			return s.{l}Repo.Delete{u}(ctx, value.{u}ID(id))
--- 		}}
--- ]],
--- 		{
--- 			i(1, "entity"),
--- 			i(2, "Entity"),
--- 			u = rep(2),
--- 			l = rep(1),
--- 		}
--- 	)
--- )
--- table.insert(snippets, pss_service)
---
--- local pss_repo = s(
--- 	{ trig = "pss-repo" },
--- 	fmt(
--- 		[[
--- 	// {}ByID returns {} by id.
--- 	func ({} {u}) {u}ByID(ctx context.Context, id string) (entity.{u}, error) {{
--- 		var res entity.{u}
---
--- 		if err := {s}.db.GetContext(
--- 			ctx,
--- 			&res,
--- 			`
--- 			`,
--- 			id,
--- 		); err != nil {{
--- 			if errors.Is(err, sql.ErrNoRows) {{
--- 				return res, failure.NewNotFoundError(fmt.Sprintf("{l} id %v", id))
--- 			}}
---
--- 			return res, fmt.Errorf("db.GetContext: %w", err)
--- 		}}
---
--- 		return res, nil
--- 	}}
---
--- 	// {u}s returns all {l}.
--- 	func ({s} {u}) {u}s(ctx context.Context) ([]entity.{u}, error) {{
--- 		var res []entity.{u}
---
--- 		if err := {s}.db.SelectContext(
--- 			ctx,
--- 			&res,
--- 			`
--- 			`,
--- 		); err != nil {{
--- 			return nil, fmt.Errorf("db.SelectContext: %w", err)
--- 		}}
---
--- 		return res, nil
--- 	}}
---
--- 	// Create{u} creates {l}.
--- 	func ({s} {u}) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
--- 		{l}.ID = value.{u}ID(entity.GenerateUID())
---
--- 		if _, err := {s}.db.NamedExecContext(
--- 			ctx,
--- 			``,
--- 			{l},
--- 		); err != nil {{
--- 			return entity.{u}{{}}, fmt.Errorf("db.NamedExecContext: %w", err)
--- 		}}
---
--- 		return {l}, nil
--- 	}}
---
--- 	// Update{u} updates {l}.
--- 	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
--- 		if _, err := {s}.db.NamedExecContext(
--- 			ctx,
--- 			``,
--- 			{l},
--- 		); err != nil {{
--- 			return fmt.Errorf("db.NamedExecContext: %w", err)
--- 		}}
---
--- 		return nil
--- 	}}
---
--- 	// Delete{u} deletes {l}.
--- 	func ({s} {u}) Delete{u}(ctx context.Context, id string) error {{
--- 		if _, err := {s}.db.ExecContext(
--- 			ctx,
--- 			`
--- 			`,
--- 			id,
--- 		); err != nil {{
--- 			return fmt.Errorf("db.ExecContext: %w", err)
--- 		}}
---
--- 		return nil
--- 	}}
--- ]],
--- 		{
--- 			i(1, "ENITITY"),
--- 			i(2, "enitity"),
--- 			i(3, "r"),
--- 			u = rep(1),
--- 			l = rep(2),
--- 			s = rep(3),
--- 		}
--- 	)
--- )
--- table.insert(snippets, pss_repo)
---
--- local pss_grpc = s(
--- 	{ trig = "pss_grpc" },
--- 	fmt(
--- 		[[
--- type {}Service interface {{
--- 	{}ByID(ctx context.Context, id string) (entity.{u}, error)
--- 	{u}s(ctx context.Context) ([]entity.{u}, error)
--- 	Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
--- 	Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
--- 	Delete{u}(ctx context.Context, id string) error
--- }}
---
--- func (s Server) Get{u}(ctx context.Context, r *pb.Get{u}Request) (*pb.{u}, error) {{
--- 	c, err := s.{l}Service.{u}ByID(ctx, r.Id)
--- 	if err != nil {{
--- 		return nil, fmt.Errorf("{l}Service.{u}ByID: %w", err)
--- 	}}
---
--- 	return newProtobufValueFrom{u}(c), nil
--- }}
---
--- func (s Server) List{u}s(ctx context.Context, _ *emptypb.Empty) (*pb.List{u}sResponse, error) {{
--- 	c, err := s.{l}Service.{u}s(ctx)
--- 	if err != nil {{
--- 		return nil, fmt.Errorf("{l}Service.{u}s: %w", err)
--- 	}}
---
--- 	return &pb.List{u}sResponse{{
--- 		{u}s: newProtobufValueFrom{u}s(c),
--- 	}}, nil
--- }}
---
--- func (s Server) Create{u}(ctx context.Context, r *pb.Create{u}Request) (*pb.{u}, error) {{
--- 	c := new{u}FromCreateRequest(r)
---
--- 	res, err := s.{l}Service.Create{u}(ctx, c)
--- 	if err != nil {{
--- 		return nil, fmt.Errorf("{l}Service.Create{u}: %w", err)
--- 	}}
---
--- 	return newProtobufValueFrom{u}(res), nil
--- }}
---
--- func (s Server) Update{u}(ctx context.Context, r *pb.Update{u}Request) (*pb.{u}, error) {{
--- 	c := new{u}FromUpdateRequest(r)
---
--- 	{l}, err := s.{l}Service.Update{u}(ctx, c)
--- 	if err != nil {{
--- 		return nil, fmt.Errorf("{l}Service.Update{u}: %w", err)
--- 	}}
---
--- 	return newProtobufValueFrom{u}({l}), nil
--- }}
---
--- func (s Server) Delete{u}(ctx context.Context, r *pb.Delete{u}Request) (*emptypb.Empty, error) {{
--- 	err := s.{l}Service.Delete{u}(ctx, r.Id)
--- 	if err != nil {{
--- 		return nil, fmt.Errorf("{l}Service.Delete{u}: %w", err)
--- 	}}
---
--- 	return &emptypb.Empty{{}}, nil
--- }}
--- ]],
---
--- 		{
--- 			i(1, "entity"),
--- 			i(2, "ENTITY"),
--- 			u = rep(2),
--- 			l = rep(1),
--- 		}
--- 	)
--- )
--- table.insert(snippets, pss_grpc)
--- End Refactoring --
---
-local firstChar = function(args)
-	local firstChar = string.lower(args[1][1]:sub(1, 1))
-	return sn(nil, {
-		t(firstChar),
-	})
-end
 
 local valueStr = s(
 	{ trig = "valueStr" },
@@ -563,7 +292,7 @@ local valueStr = s(
 		{
 			Name = i(1, "Name"),
 			NameRep = rep(1),
-			value = i(2, "v"),
+			value = d(2, lowerStart, 1),
 			valueRep = rep(2),
 			char = d(3, firstChar, 1),
 			charRep = rep(3),
@@ -573,12 +302,105 @@ local valueStr = s(
 )
 table.insert(snippets, valueStr)
 
-local lowerStart = function(args)
-	local lowerCase = args[1][1]:gsub("%a", string.lower, 1)
-	return sn(nil, {
-		t(lowerCase),
-	})
-end
+local valueInt = s(
+	{ trig = "valueInt" },
+	fmt(
+		[[
+	package value
+
+	type {Name} {valueType}
+
+	func New{NameRep}({value} {valueTypeRep}) {NameRep} {{
+		return {NameRep}({valueRep})
+	}}
+
+	func ({char} {NameRep}) {ValueType}() {valueTypeRep} {{
+		return strconv.FormatInt(int64({charRep}), 10))
+	}}
+
+	func ({charRep} *{NameRep}) {ValueTypeRep}Ptr() *{valueTypeRep} {{
+		if {charRep} == nil {{
+			return nil
+		}}
+
+		res := {charRep}.{ValueTypeRep}()
+
+		return &res
+	}}
+	{}
+]],
+		{
+			Name = i(1, "Name"),
+			NameRep = rep(1),
+			valueType = c(2, {
+				t("int"),
+				t("int64"),
+				t("int8"),
+				t("int32"),
+				t("int16"),
+			}),
+			valueTypeRep = rep(2),
+			ValueType = d(3, upperStart, 2),
+			ValueTypeRep = rep(3),
+			value = d(4, lowerStart, 1),
+			valueRep = rep(4),
+			char = d(5, firstChar, 1),
+			charRep = rep(5),
+			i(0),
+		}
+	)
+)
+table.insert(snippets, valueInt)
+
+local valueUint = s(
+	{ trig = "valueUint" },
+	fmt(
+		[[
+	package value
+
+	type {Name} {valueType}
+
+	func New{NameRep}({value} {valueTypeRep}) {NameRep} {{
+		return {NameRep}({valueRep})
+	}}
+
+	func ({char} {NameRep}) {ValueType}() {valueTypeRep} {{
+		return strconv.FormatUint(uint64({charRep}), 10))
+	}}
+
+	func ({charRep} *{NameRep}) {ValueTypeRep}Ptr() *{valueTypeRep} {{
+		if {charRep} == nil {{
+			return nil
+		}}
+
+		res := {charRep}.{ValueTypeRep}()
+
+		return &res
+	}}
+	{}
+]],
+		{
+			Name = i(1, "Name"),
+			NameRep = rep(1),
+			valueType = c(2, {
+				t("uint"),
+				t("uint64"),
+				t("uint8"),
+				t("uint32"),
+				t("uint16"),
+			}),
+			valueTypeRep = rep(2),
+			ValueType = d(3, upperStart, 2),
+			ValueTypeRep = rep(3),
+			value = i(4, "v"),
+			valueRep = rep(4),
+			char = d(5, firstChar, 1),
+			charRep = rep(5),
+			i(0),
+		}
+	)
+)
+table.insert(snippets, valueUint)
 
 local testRepo = s(
 	{ trig = "testRepo" },
@@ -651,7 +473,7 @@ local testRepo = s(
 			Name = i(1, "Name"),
 			NameRep = rep(1),
 			service = i(2, "service"),
-			RepoInterface = i(3, "RepoINterface"),
+			RepoInterface = i(3, "RepoInterface"),
 			name = d(4, lowerStart, 1),
 			nameRep = rep(4),
 			FuncName = i(5, "FuncName"),
@@ -759,7 +581,7 @@ local get_return = function()
 end
 
 local returns = s(
-	{ trig = "return" },
+	{ trig = "ret" },
 	fmt(
 		[[
 		{}

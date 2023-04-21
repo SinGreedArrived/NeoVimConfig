@@ -2,6 +2,7 @@ local ls = require("luasnip") -- {{{
 local s = ls.s
 local i = ls.i
 local t = ls.t
+local l = require("luasnip.extras").lambda
 
 local d = ls.dynamic_node
 local c = ls.choice_node
@@ -74,7 +75,7 @@ local testmode = s("testmode", t("This is test mode"))
 table.insert(snippets, testmode)
 
 local forrange = s(
-	{ trig = "forr%s+(%S+)", regTrig = true, hidden = true },
+	{ trig = "forr(%S+)", regTrig = true, hidden = true },
 	fmt(
 		[[
 		for {} := range {} {{
@@ -106,32 +107,6 @@ table.insert(snippets, forrange)
 -- }))
 -- table.insert(snippets, type)
 
-local if_err_check = s(
-	"ife-",
-	fmt(
-		[[
-		if {} := {}{}({}); err != nil {{
-			return {}
-		}}
-	]],
-		{
-			c(1, { t("_, err"), t("err") }),
-			i(2, "obj"),
-			i(3, "Meth"),
-			i(4, "args"),
-			d(5, function(import)
-				return sn(nil, {
-					i(1),
-					t([[, fmt.Errorf("]]),
-					t(import[1][1]),
-					t([[: %w", err)]]),
-				})
-			end, { 3 }),
-		}
-	)
-)
-table.insert(snippets, if_err_check)
-
 local append = s(
 	{ trig = "ap%s+(%S+)", regTrig = true, hidden = true },
 	fmt(
@@ -140,7 +115,7 @@ local append = s(
 	]],
 		{
 			d(1, function(_, snip)
-				return sn(1, i(1, snip.captures[1]))
+				return sn(nil, i(1, snip.captures[1]))
 			end),
 			rep(1),
 			i(0),
@@ -245,55 +220,27 @@ local rerr = s(
 )
 table.insert(autosnippets, rerr)
 
-local if_err = s(
-	{ trig = "ife" },
-	fmt(
-		[[
-		if err != nil {{
-			return {}
-		}}
-	]],
-		{
-			c(1, {
-				sn(nil, { i(1) }),
-				sn(nil, {
-					t([[fmt.Errorf("]]),
-					r(1, "errFunc", i(1, "errFunc")),
-					t([[: %w", err)]]),
-				}),
-				sn(nil, { i(1), t([[, fmt.Errorf("]]), r(2, "errFunc"), t([[: %w", err)]]) }),
-			}),
-		}
-	)
-)
-table.insert(snippets, if_err)
-
 local baseRepo = s(
-	{ trig = "baseRepo" },
+	{ trig = "sRepo" },
 	fmt(
 		[[
-	// {} repository.
-	type {} struct {{
+	// {RepoName} repository.
+	type {RepoNameRep} struct {{
 		db *sqlx.DB
 	}}
 
-	// New{} return {} repository.
-	func New{}(
+	// New{RepoNameRep} return {RepoNameRep} repository.
+	func New{RepoNameRep}(
 		db *sqlx.DB,
-	) {} {{
-		return {}{{
+	) {RepoNameRep} {{
+		return {RepoNameRep}{{
 			db:db,
 		}}
 	}}
 ]],
 		{
-			i(1, "RepoName"),
-			rep(1),
-			rep(1),
-			rep(1),
-			rep(1),
-			rep(1),
-			rep(1),
+			RepoName = i(1, "RepoName"),
+			RepoNameRep = rep(1),
 		}
 	)
 )
@@ -337,269 +284,494 @@ local dbIntToValue = s(
 )
 table.insert(snippets, dbIntToValue)
 
+-- baseService
 local baseService = s(
-	{ trig = "baseService" },
+	{ trig = "sService" },
 	fmt(
 		[[
 	// Service.
-	type {} struct {{
-		{}
+	type {Name} struct {{
+		{fields}
 	}}
 
 	// New service.
 	func New(
-		{}
-	) *{} {{
-		s := &{}{{
-			{}
-		}}
+		{fieldsRepWithComm}
+	) *{NameRep} {{
+		s := &{NameRep}{{{}}}
 
 		return s
 	}}
-	{}
 ]],
 		{
-			i(1, "Service"),
-			i(2, ""),
-			rep(2),
-			rep(1),
-			rep(1),
-			rep(2),
+			Name = i(1, "Service"),
+			fields = i(2, ""),
+			NameRep = rep(1),
+			fieldsRepWithComm = l(l._1:gsub("\n", ",\n"), 2),
 			i(0),
 		}
 	)
 )
 table.insert(snippets, baseService)
 
--- PSS admin methods
-local pss_service = s(
-	{ trig = "pss_service" },
+-- PSS admin methods local pss_service = s( { trig = "pss_service" }, fmt( [[ type {}Repo interface {{ {}ByID(ctx context.Context, id value.{u}ID) (entity.{u}, error) {u}s(ctx context.Context) ([]entity.{u}, error) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) Delete{u}(ctx context.Context, id value.{u}ID) error }} // {u}ByID returns {l} by id. func (s Service) {u}ByID( ctx context.Context, id string,) (entity.{u}, error) {{ return s.{l}Repo.{u}ByID(ctx, value.{u}ID(id)) }}
+--
+--
+-- 		// {u}s returns all {l}.
+-- 		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
+-- 			return s.{l}Repo.{u}s(ctx)
+-- 		}}
+--
+-- 		// Create{u} creates {l}.
+-- 		func (s Service) Create{u}(
+-- 			ctx context.Context,
+-- 			{l} entity.{u},
+-- 		) (entity.{u}, error) {{
+-- 			return s.{l}Repo.Create{u}(ctx, {l})
+-- 		}}
+--
+-- 		// Update{u} updates {l}.
+-- 		func (s Service) Update{u}(
+-- 			ctx context.Context,
+-- 			{l} entity.{u},
+-- 		) (entity.{u}, error) {{
+-- 			return s.{l}Repo.Update{u}(ctx, {l})
+-- 		}}
+--
+-- 		// Delete{u} deletes {l}.
+-- 		func (s Service) Delete{u}(
+-- 			ctx context.Context,
+-- 			id string,
+-- 		) error {{
+-- 			return s.{l}Repo.Delete{u}(ctx, value.{u}ID(id))
+-- 		}}
+-- ]],
+-- 		{
+-- 			i(1, "entity"),
+-- 			i(2, "Entity"),
+-- 			u = rep(2),
+-- 			l = rep(1),
+-- 		}
+-- 	)
+-- )
+-- table.insert(snippets, pss_service)
+--
+-- local pss_repo = s(
+-- 	{ trig = "pss-repo" },
+-- 	fmt(
+-- 		[[
+-- 	// {}ByID returns {} by id.
+-- 	func ({} {u}) {u}ByID(ctx context.Context, id string) (entity.{u}, error) {{
+-- 		var res entity.{u}
+--
+-- 		if err := {s}.db.GetContext(
+-- 			ctx,
+-- 			&res,
+-- 			`
+-- 			`,
+-- 			id,
+-- 		); err != nil {{
+-- 			if errors.Is(err, sql.ErrNoRows) {{
+-- 				return res, failure.NewNotFoundError(fmt.Sprintf("{l} id %v", id))
+-- 			}}
+--
+-- 			return res, fmt.Errorf("db.GetContext: %w", err)
+-- 		}}
+--
+-- 		return res, nil
+-- 	}}
+--
+-- 	// {u}s returns all {l}.
+-- 	func ({s} {u}) {u}s(ctx context.Context) ([]entity.{u}, error) {{
+-- 		var res []entity.{u}
+--
+-- 		if err := {s}.db.SelectContext(
+-- 			ctx,
+-- 			&res,
+-- 			`
+-- 			`,
+-- 		); err != nil {{
+-- 			return nil, fmt.Errorf("db.SelectContext: %w", err)
+-- 		}}
+--
+-- 		return res, nil
+-- 	}}
+--
+-- 	// Create{u} creates {l}.
+-- 	func ({s} {u}) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
+-- 		{l}.ID = value.{u}ID(entity.GenerateUID())
+--
+-- 		if _, err := {s}.db.NamedExecContext(
+-- 			ctx,
+-- 			``,
+-- 			{l},
+-- 		); err != nil {{
+-- 			return entity.{u}{{}}, fmt.Errorf("db.NamedExecContext: %w", err)
+-- 		}}
+--
+-- 		return {l}, nil
+-- 	}}
+--
+-- 	// Update{u} updates {l}.
+-- 	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
+-- 		if _, err := {s}.db.NamedExecContext(
+-- 			ctx,
+-- 			``,
+-- 			{l},
+-- 		); err != nil {{
+-- 			return fmt.Errorf("db.NamedExecContext: %w", err)
+-- 		}}
+--
+-- 		return nil
+-- 	}}
+--
+-- 	// Delete{u} deletes {l}.
+-- 	func ({s} {u}) Delete{u}(ctx context.Context, id string) error {{
+-- 		if _, err := {s}.db.ExecContext(
+-- 			ctx,
+-- 			`
+-- 			`,
+-- 			id,
+-- 		); err != nil {{
+-- 			return fmt.Errorf("db.ExecContext: %w", err)
+-- 		}}
+--
+-- 		return nil
+-- 	}}
+-- ]],
+-- 		{
+-- 			i(1, "ENITITY"),
+-- 			i(2, "enitity"),
+-- 			i(3, "r"),
+-- 			u = rep(1),
+-- 			l = rep(2),
+-- 			s = rep(3),
+-- 		}
+-- 	)
+-- )
+-- table.insert(snippets, pss_repo)
+--
+-- local pss_grpc = s(
+-- 	{ trig = "pss_grpc" },
+-- 	fmt(
+-- 		[[
+-- type {}Service interface {{
+-- 	{}ByID(ctx context.Context, id string) (entity.{u}, error)
+-- 	{u}s(ctx context.Context) ([]entity.{u}, error)
+-- 	Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+-- 	Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
+-- 	Delete{u}(ctx context.Context, id string) error
+-- }}
+--
+-- func (s Server) Get{u}(ctx context.Context, r *pb.Get{u}Request) (*pb.{u}, error) {{
+-- 	c, err := s.{l}Service.{u}ByID(ctx, r.Id)
+-- 	if err != nil {{
+-- 		return nil, fmt.Errorf("{l}Service.{u}ByID: %w", err)
+-- 	}}
+--
+-- 	return newProtobufValueFrom{u}(c), nil
+-- }}
+--
+-- func (s Server) List{u}s(ctx context.Context, _ *emptypb.Empty) (*pb.List{u}sResponse, error) {{
+-- 	c, err := s.{l}Service.{u}s(ctx)
+-- 	if err != nil {{
+-- 		return nil, fmt.Errorf("{l}Service.{u}s: %w", err)
+-- 	}}
+--
+-- 	return &pb.List{u}sResponse{{
+-- 		{u}s: newProtobufValueFrom{u}s(c),
+-- 	}}, nil
+-- }}
+--
+-- func (s Server) Create{u}(ctx context.Context, r *pb.Create{u}Request) (*pb.{u}, error) {{
+-- 	c := new{u}FromCreateRequest(r)
+--
+-- 	res, err := s.{l}Service.Create{u}(ctx, c)
+-- 	if err != nil {{
+-- 		return nil, fmt.Errorf("{l}Service.Create{u}: %w", err)
+-- 	}}
+--
+-- 	return newProtobufValueFrom{u}(res), nil
+-- }}
+--
+-- func (s Server) Update{u}(ctx context.Context, r *pb.Update{u}Request) (*pb.{u}, error) {{
+-- 	c := new{u}FromUpdateRequest(r)
+--
+-- 	{l}, err := s.{l}Service.Update{u}(ctx, c)
+-- 	if err != nil {{
+-- 		return nil, fmt.Errorf("{l}Service.Update{u}: %w", err)
+-- 	}}
+--
+-- 	return newProtobufValueFrom{u}({l}), nil
+-- }}
+--
+-- func (s Server) Delete{u}(ctx context.Context, r *pb.Delete{u}Request) (*emptypb.Empty, error) {{
+-- 	err := s.{l}Service.Delete{u}(ctx, r.Id)
+-- 	if err != nil {{
+-- 		return nil, fmt.Errorf("{l}Service.Delete{u}: %w", err)
+-- 	}}
+--
+-- 	return &emptypb.Empty{{}}, nil
+-- }}
+-- ]],
+--
+-- 		{
+-- 			i(1, "entity"),
+-- 			i(2, "ENTITY"),
+-- 			u = rep(2),
+-- 			l = rep(1),
+-- 		}
+-- 	)
+-- )
+-- table.insert(snippets, pss_grpc)
+-- End Refactoring --
+--
+local firstChar = function(args)
+	local firstChar = string.lower(args[1][1]:sub(1, 1))
+	return sn(nil, {
+		t(firstChar),
+	})
+end
+
+local valueStr = s(
+	{ trig = "valueStr" },
 	fmt(
 		[[
-		type {}Repo interface {{
-			{}ByID(ctx context.Context, id value.{u}ID) (entity.{u}, error)
-			{u}s(ctx context.Context) ([]entity.{u}, error)
-			Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
-			Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
-			Delete{u}(ctx context.Context, id value.{u}ID) error
+	package value
+
+	type {Name} string
+
+	func New{NameRep}({value} string) {NameRep} {{
+		return {NameRep}({valueRep})
+	}}
+
+	func ({char} {NameRep}) String() string {{
+		return string({charRep})
+	}}
+
+	func ({charRep} *{NameRep}) StringPtr() *string {{
+		if {charRep} == nil {{
+			return nil
 		}}
 
-		// {u}ByID returns {l} by id.
-		func (s Service) {u}ByID(
-			ctx context.Context,
-			id string,
-		) (entity.{u}, error) {{
-			return s.{l}Repo.{u}ByID(ctx, value.{u}ID(id))
-		}}
+		res := {charRep}.String()
 
-
-		// {u}s returns all {l}.
-		func (s Service) {u}s(ctx context.Context) ([]entity.{u}, error) {{
-			return s.{l}Repo.{u}s(ctx)
-		}}
-
-		// Create{u} creates {l}.
-		func (s Service) Create{u}(
-			ctx context.Context,
-			{l} entity.{u},
-		) (entity.{u}, error) {{
-			return s.{l}Repo.Create{u}(ctx, {l})
-		}}
-
-		// Update{u} updates {l}.
-		func (s Service) Update{u}(
-			ctx context.Context,
-			{l} entity.{u},
-		) (entity.{u}, error) {{
-			return s.{l}Repo.Update{u}(ctx, {l})
-		}}
-
-		// Delete{u} deletes {l}.
-		func (s Service) Delete{u}(
-			ctx context.Context,
-			id string,
-		) error {{
-			return s.{l}Repo.Delete{u}(ctx, value.{u}ID(id))
-		}}
+		return &res
+	}}
+	{}
 ]],
 		{
-			i(1, "entity"),
-			i(2, "Entity"),
-			u = rep(2),
-			l = rep(1),
+			Name = i(1, "Name"),
+			NameRep = rep(1),
+			value = i(2, "v"),
+			valueRep = rep(2),
+			char = d(3, firstChar, 1),
+			charRep = rep(3),
+			i(0),
 		}
 	)
 )
-table.insert(snippets, pss_service)
+table.insert(snippets, valueStr)
 
-local pss_repo = s(
-	{ trig = "pss-repo" },
+local lowerStart = function(args)
+	local lowerCase = args[1][1]:gsub("%a", string.lower, 1)
+	return sn(nil, {
+		t(lowerCase),
+	})
+end
+
+local testRepo = s(
+	{ trig = "testRepo" },
 	fmt(
 		[[
-	// {}ByID returns {} by id.
-	func ({} {u}) {u}ByID(ctx context.Context, id string) (entity.{u}, error) {{
-		var res entity.{u}
+			type test{Name}RepoSuite struct {{
+				suite.Suite
 
-		if err := {s}.db.GetContext(
-			ctx,
-			&res,
-			`
-			`,
-			id,
-		); err != nil {{
-			if errors.Is(err, sql.ErrNoRows) {{
-				return res, failure.NewNotFoundError(fmt.Sprintf("{l} id %v", id))
+				db         *sqlx.DB
+				{name}Repo {service}.{RepoInterface}
 			}}
 
-			return res, fmt.Errorf("db.GetContext: %w", err)
-		}}
+			func Test{NameRep}Repo(t *testing.T) {{
+				if testing.Short() {{
+					t.Skip("skipping integration test")
+				}}
 
-		return res, nil
-	}}
+				suite.Run(t, &test{NameRep}RepoSuite{{}})
+			}}
 
-	// {u}s returns all {l}.
-	func ({s} {u}) {u}s(ctx context.Context) ([]entity.{u}, error) {{
-		var res []entity.{u}
+			// SetupSuite will run before the tests in the suite are run.
+			func (s *test{NameRep}RepoSuite) SetupSuite() {{
+				cfg, err := config.NewConfig()
+				s.Require().NoError(err)
 
-		if err := {s}.db.SelectContext(
-			ctx,
-			&res,
-			`
-			`,
-		); err != nil {{
-			return nil, fmt.Errorf("db.SelectContext: %w", err)
-		}}
+				db, err := sqlx.Connect("pgx", cfg.PG.URL)
+				s.Require().NoError(err)
 
-		return res, nil
-	}}
+				s.db = db
+				s.{nameRep}Repo = persistence.New{NameRep}(db)
+			}}
 
-	// Create{u} creates {l}.
-	func ({s} {u}) Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
-		{l}.ID = value.{u}ID(entity.GenerateUID())
+			// TearDownSuite will run after all the tests in the suite have been run.
+			func (s *test{NameRep}RepoSuite) TearDownSuite() {{
+				s.db.Close()
+			}}
 
-		if _, err := {s}.db.NamedExecContext(
-			ctx,
-			``,
-			{l},
-		); err != nil {{
-			return entity.{u}{{}}, fmt.Errorf("db.NamedExecContext: %w", err)
-		}}
+			func (s *test{NameRep}RepoSuite) Test{FuncName}() {{
+				ctx := context.Background()
+				rq := s.Require()
 
-		return {l}, nil
-	}}
+				err := dbtest.MigrateFromFile(s.db, "testdata/{funcName}.sql")
+				rq.NoError(err)
 
-	// Update{u} updates {l}.
-	func ({s} {u}) Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error) {{
-		if _, err := {s}.db.NamedExecContext(
-			ctx,
-			``,
-			{l},
-		); err != nil {{
-			return fmt.Errorf("db.NamedExecContext: %w", err)
-		}}
+				testCases := []struct{{
+					name string
+					errorText string
+				}}{{
+					{{}},
+				}}
 
-		return nil
-	}}
-
-	// Delete{u} deletes {l}.
-	func ({s} {u}) Delete{u}(ctx context.Context, id string) error {{
-		if _, err := {s}.db.ExecContext(
-			ctx,
-			`
-			`,
-			id,
-		); err != nil {{
-			return fmt.Errorf("db.ExecContext: %w", err)
-		}}
-
-		return nil
-	}}
+				for _, tc := range testCases {{
+					s.Run(tc.name, func() {{
+						result, err := s.{nameRep}Repo.{FuncNameRep}(
+							ctx,
+							{}
+						)
+						if tc.errorText != "" {{
+							rq.Error(err)
+							rq.ErrorContains(err, tc.errorText)
+						}}else{{
+							rq.NoError(err)
+							rq.EqualValues(tc.expected, result)
+						}}
+					}})
+				}}
+			}}
 ]],
 		{
-			i(1, "ENITITY"),
-			i(2, "enitity"),
-			i(3, "r"),
-			u = rep(1),
-			l = rep(2),
-			s = rep(3),
+			Name = i(1, "Name"),
+			NameRep = rep(1),
+			service = i(2, "service"),
+			RepoInterface = i(3, "RepoINterface"),
+			name = d(4, lowerStart, 1),
+			nameRep = rep(4),
+			FuncName = i(5, "FuncName"),
+			funcName = d(6, lowerStart, 1),
+			FuncNameRep = rep(5),
+			i(0),
 		}
 	)
 )
-table.insert(snippets, pss_repo)
+table.insert(snippets, testRepo)
 
-local pss_grpc = s(
-	{ trig = "pss_grpc" },
+local trim_parenthese = function(args)
+	return args:gsub("%(", ""):gsub("%)", ""):gsub("%s", "")
+end
+
+local func_name_for_err = function()
+	local curLine = vim.api.nvim_win_get_cursor(0)[1]
+
+	for j = curLine, 1, -1 do
+		local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
+		local func_name = line:match("err :?= ([^(]+)%(")
+		if func_name then
+			local _, dot_count = func_name:gsub("%.", "")
+			if dot_count > 1 then
+				return func_name:gsub("%w+%.", "", dot_count - 1)
+			end
+			return func_name:gsub("%w", string.lower, 1)
+		end
+	end
+end
+
+local split = function(inputstr, sep)
+	if sep == nil then
+		sep = "%s"
+	end
+	local result = {}
+	for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+		table.insert(result, str)
+	end
+	return result
+end
+
+local get_nil_value = function(type)
+	local nilValue = {}
+	nilValue["^string$"] = [[""]]
+	nilValue["^%*"] = "nil"
+	nilValue["^error$"] = [[fmt.Errorf("]] .. func_name_for_err() .. [[: %w", err)]]
+	nilValue["u?int%d?%d?"] = "0"
+	nilValue["^entity.*$"] = type .. "{}"
+
+	for key, value in pairs(nilValue) do
+		if type:match(key) then
+			return value
+		end
+	end
+
+	return "nil"
+end
+
+local get_return = function()
+	return f(function()
+		local result = "return "
+		local curLine = vim.api.nvim_win_get_cursor(0)[1]
+
+		for j = curLine, 1, -1 do
+			local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
+
+			if line:match("^%)%s%w+%([^)]*%)%s(.*)%s{$") then
+				local line_result = line:match("^%)%s%w+%([^)]*%)%s(.*)%s{$")
+				if method_result then
+					local returns = split(trim_parenthese(method_result), ",")
+					for _, value in ipairs(returns) do
+						local val = get_nil_value(value)
+						result = result .. val .. ", "
+					end
+					return result:gsub(",%s$", "")
+				end
+			end
+
+			if line:match("^func") then
+				local method_result = line:match("^func%s%([^)]+%)%s%w+%([^)]*%)%s(.*)%s{$")
+				if method_result then
+					local returns = split(trim_parenthese(method_result), ",")
+					for _, value in ipairs(returns) do
+						local val = get_nil_value(value)
+						result = result .. val .. ", "
+					end
+					return result:gsub(",%s$", "")
+				end
+
+				local func_result = line:match("^func%s%w+%([^)]*%)%s(.*)%s{$")
+				if func_result then
+					local returns = split(trim_parenthese(func_result), ",")
+					for _, value in ipairs(returns) do
+						local val = get_nil_value(value)
+						result = result .. val .. ", "
+					end
+					return result:gsub(",%s$", "")
+				end
+			end
+		end
+
+		return result
+	end, {})
+end
+
+local returns = s(
+	{ trig = "return" },
 	fmt(
 		[[
-type {}Service interface {{
-	{}ByID(ctx context.Context, id string) (entity.{u}, error)
-	{u}s(ctx context.Context) ([]entity.{u}, error)
-	Create{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
-	Update{u}(ctx context.Context, {l} entity.{u}) (entity.{u}, error)
-	Delete{u}(ctx context.Context, id string) error
-}}
-
-func (s Server) Get{u}(ctx context.Context, r *pb.Get{u}Request) (*pb.{u}, error) {{
-	c, err := s.{l}Service.{u}ByID(ctx, r.Id)
-	if err != nil {{
-		return nil, fmt.Errorf("{l}Service.{u}ByID: %w", err)
-	}}
-
-	return newProtobufValueFrom{u}(c), nil
-}}
-
-func (s Server) List{u}s(ctx context.Context, _ *emptypb.Empty) (*pb.List{u}sResponse, error) {{
-	c, err := s.{l}Service.{u}s(ctx)
-	if err != nil {{
-		return nil, fmt.Errorf("{l}Service.{u}s: %w", err)
-	}}
-
-	return &pb.List{u}sResponse{{
-		{u}s: newProtobufValueFrom{u}s(c),
-	}}, nil
-}}
-
-func (s Server) Create{u}(ctx context.Context, r *pb.Create{u}Request) (*pb.{u}, error) {{
-	c := new{u}FromCreateRequest(r)
-
-	res, err := s.{l}Service.Create{u}(ctx, c)
-	if err != nil {{
-		return nil, fmt.Errorf("{l}Service.Create{u}: %w", err)
-	}}
-
-	return newProtobufValueFrom{u}(res), nil
-}}
-
-func (s Server) Update{u}(ctx context.Context, r *pb.Update{u}Request) (*pb.{u}, error) {{
-	c := new{u}FromUpdateRequest(r)
-
-	{l}, err := s.{l}Service.Update{u}(ctx, c)
-	if err != nil {{
-		return nil, fmt.Errorf("{l}Service.Update{u}: %w", err)
-	}}
-
-	return newProtobufValueFrom{u}({l}), nil
-}}
-
-func (s Server) Delete{u}(ctx context.Context, r *pb.Delete{u}Request) (*emptypb.Empty, error) {{
-	err := s.{l}Service.Delete{u}(ctx, r.Id)
-	if err != nil {{
-		return nil, fmt.Errorf("{l}Service.Delete{u}: %w", err)
-	}}
-
-	return &emptypb.Empty{{}}, nil
-}}
-]],
-
+		{}
+	]],
 		{
-			i(1, "entity"),
-			i(2, "ENTITY"),
-			u = rep(2),
-			l = rep(1),
+			get_return(),
 		}
 	)
 )
-table.insert(snippets, pss_grpc)
--- End Refactoring --
+table.insert(snippets, returns)
+
+local context = s({ trig = "ctx" }, fmt("{}", { t("ctx context.Context") }))
+table.insert(snippets, context)
 
 return snippets, autosnippets

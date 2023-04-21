@@ -237,6 +237,13 @@ return require("packer").startup({
 				vim.cmd([[ colorscheme gruvbox ]])
 			end,
 		})
+		-- colorizer
+		use({
+			"norcalli/nvim-colorizer.lua",
+			config = function()
+				require("colorizer").setup()
+			end,
+		})
 		-- color picker
 		use({
 			"ziontee113/color-picker.nvim",
@@ -244,7 +251,6 @@ return require("packer").startup({
 				require("color-picker")
 			end,
 		})
-		-- PACKER_BOOTSTRAP
 		if PACKER_BOOTSTRAP then
 			require("packer").sync()
 		end

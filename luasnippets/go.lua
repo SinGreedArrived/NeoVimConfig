@@ -91,6 +91,86 @@ local upperStart = function(args)
 	})
 end
 
+local trim_parenthese = function(args)
+	return args:gsub("%(", ""):gsub("%)", ""):gsub("%s", "")
+end
+
+local func_name_for_err = function()
+	local curLine = vim.api.nvim_win_get_cursor(0)[1]
+
+	for j = curLine, 1, -1 do
+		local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
+		local func_name = line:match("err :?= ([^(]+)%(")
+		if func_name then
+			local _, dot_count = func_name:gsub("%.", "")
+			if dot_count > 1 then
+				return func_name:gsub("%w+%.", "", dot_count - 1)
+			end
+			return func_name:gsub("%w", string.lower, 1)
+		end
+	end
+end
+
+local split = function(inputstr, sep)
+	if sep == nil then
+		sep = "%s"
+	end
+	local result = {}
+	for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+		table.insert(result, str)
+	end
+	return result
+end
+
+local get_nil_value = function(type)
+	local nilValue = {}
+	nilValue["^string$"] = [[""]]
+	nilValue["^%*"] = "nil"
+	nilValue["^error$"] = [[fmt.Errorf("]] .. func_name_for_err() .. [[: %w", err)]]
+	nilValue["u?int%d?%d?"] = "0"
+	nilValue["^entity.*$"] = type .. "{}"
+
+	for key, value in pairs(nilValue) do
+		if type:match(key) then
+			return value
+		end
+	end
+
+	return "nil"
+end
+
+local get_return = function()
+	return f(function()
+		local result = "return "
+		local curLine = vim.api.nvim_win_get_cursor(0)[1]
+		local method_result = ""
+
+		for j = curLine, 1, -1 do
+			local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
+
+			if line:match("^%)%s(.*)%s{$") then
+				method_result = line:match("^%)%s(.*)%s{$")
+			end
+
+			if line:match("^func") then
+				method_result = line:match("^func.*%)%s(.*)%s{$")
+			end
+
+			if method_result ~= "" then
+				local returns = split(trim_parenthese(method_result), ",")
+				for _, value in ipairs(returns) do
+					local val = get_nil_value(value)
+					result = result .. val .. ", "
+				end
+				return result:gsub(",%s$", "")
+			end
+		end
+
+		return result
+	end, {})
+end
+
+
 -- Start Refactoring --
 local testmode = s("testmode", t("This is test mode"))
 table.insert(snippets, testmode)
@@ -484,101 +564,6 @@ local testRepo = s(
 	)
 )
 table.insert(snippets, testRepo)
-
-local trim_parenthese = function(args)
-	return args:gsub("%(", ""):gsub("%)", ""):gsub("%s", "")
-end
-
-local func_name_for_err = function()
-	local curLine = vim.api.nvim_win_get_cursor(0)[1]
-
-	for j = curLine, 1, -1 do
-		local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
-		local func_name = line:match("err :?= ([^(]+)%(")
-		if func_name then
-			local _, dot_count = func_name:gsub("%.", "")
-			if dot_count > 1 then
-				return func_name:gsub("%w+%.", "", dot_count - 1)
-			end
-			return func_name:gsub("%w", string.lower, 1)
-		end
-	end
-end
-
-local split = function(inputstr, sep)
-	if sep == nil then
-		sep = "%s"
-	end
-	local result = {}
-	for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
-		table.insert(result, str)
-	end
-	return result
-end
-
-local get_nil_value = function(type)
-	local nilValue = {}
-	nilValue["^string$"] = [[""]]
-	nilValue["^%*"] = "nil"
-	nilValue["^error$"] = [[fmt.Errorf("]] .. func_name_for_err() .. [[: %w", err)]]
-	nilValue["u?int%d?%d?"] = "0"
-	nilValue["^entity.*$"] = type .. "{}"
-
-	for key, value in pairs(nilValue) do
-		if type:match(key) then
-			return value
-		end
-	end
-
-	return "nil"
-end
-
-local get_return = function()
-	return f(function()
-		local result = "return "
-		local curLine = vim.api.nvim_win_get_cursor(0)[1]
-
-		for j = curLine, 1, -1 do
-			local line = vim.api.nvim_buf_get_lines(0, j - 1, j, false)[1]
-
-			if line:match("^%)%s%w+%([^)]*%)%s(.*)%s{$") then
-				local line_result = line:match("^%)%s%w+%([^)]*%)%s(.*)%s{$")
-				if method_result then
-					local returns = split(trim_parenthese(method_result), ",")
-					for _, value in ipairs(returns) do
-						local val = get_nil_value(value)
-						result = result .. val .. ", "
-					end
-					return result:gsub(",%s$", "")
-				end
-			end
-
-			if line:match("^func") then
-				local method_result = line:match("^func%s%([^)]+%)%s%w+%([^)]*%)%s(.*)%s{$")
-				if method_result then
-					local returns = split(trim_parenthese(method_result), ",")
-					for _, value in ipairs(returns) do
-						local val = get_nil_value(value)
-						result = result .. val .. ", "
-					end
-					return result:gsub(",%s$", "")
-				end
-
-				local func_result = line:match("^func%s%w+%([^)]*%)%s(.*)%s{$")
-				if func_result then
-					local returns = split(trim_parenthese(func_result), ",")
-					for _, value in ipairs(returns) do
-						local val = get_nil_value(value)
-						result = result .. val .. ", "
-					end
-					return result:gsub(",%s$", "")
-				end
-			end
-		end
-
-		return result
-	end, {})
-end
 
 local returns = s(
 	{ trig = "ret" },

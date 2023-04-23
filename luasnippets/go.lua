@@ -128,7 +128,8 @@ local get_nil_value = function(type)
 	nilValue["^%*"] = "nil"
 	nilValue["^error$"] = [[fmt.Errorf("]] .. func_name_for_err() .. [[: %w", err)]]
 	nilValue["u?int%d?%d?"] = "0"
-	nilValue["^entity.*$"] = type .. "{}"
+	nilValue["float%d?%d?"] = "0.0"
+	nilValue["^%w+%..*$"] = type .. "{}"
 
 	for key, value in pairs(nilValue) do
 		if type:match(key) then
@@ -169,7 +170,6 @@ local get_return = function()
 		return result
 	end, {})
 end
-
 
 -- Start Refactoring --
 local testmode = s("testmode", t("This is test mode"))

@@ -190,6 +190,19 @@ local append = s(
 )
 table.insert(snippets, append)
 
+local iferr = s(
+	{ trig = "iferr" },
+	fmt(
+		[[
+	if err != nil {{
+		{}
+	}}
+]],
+		{ get_return() }
+	)
+)
+table.insert(snippets, iferr)
+
 local func = s(
 	{ trig = "fn%s+(.+)", regTrig = true, hidden = true },
 	fmt(

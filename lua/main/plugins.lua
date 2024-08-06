@@ -99,6 +99,7 @@ return require("packer").startup({
 				{ "rcarriga/nvim-dap-ui" },
 				{ "theHamsta/nvim-dap-virtual-text" },
 				{ "nvim-telescope/telescope-dap.nvim" },
+				{ "nvim-neotest/nvim-nio" },
 			},
 			config = function()
 				require(config_dir .. "dap")
@@ -119,20 +120,12 @@ return require("packer").startup({
 			end,
 		})
 		-- akinsho/bufferline.nvim
-		use({
-			"akinsho/bufferline.nvim",
-			tag = "v2.*",
-			requires = { { "kyazdani42/nvim-web-devicons" } },
+		use ({
+			'akinsho/bufferline.nvim',
+			tag = "*",
+			requires = 'nvim-tree/nvim-web-devicons',
 			config = function()
 				require(config_dir .. "bufferline")
-			end,
-		})
-		-- NTBBloodbath/rest.nvim
-		use({
-			"NTBBloodbath/rest.nvim",
-			requires = { "nvim-lua/plenary.nvim" },
-			config = function()
-				require(config_dir .. "rest")
 			end,
 		})
 		-- junegunn/fzf
@@ -142,12 +135,6 @@ return require("packer").startup({
 				vim.fn["fzf#install"]()
 			end,
 		})
-		-- -- kevinhwang91/nvim-bqf
-		-- use {
-		-- 	'kevinhwang91/nvim-bqf', ft = 'qf'
-		-- }
-		-- sindrets/diffview.nvim
-		use({ "sindrets/diffview.nvim" })
 		-- lewis6991/gitsigns.nvim
 		use({
 			"lewis6991/gitsigns.nvim",
@@ -168,22 +155,6 @@ return require("packer").startup({
 				require("telescope").load_extension("goimpl")
 			end,
 		})
-		-- Database
-		-- use {
-		--     "tpope/vim-dadbod",
-		--     opt = true,
-		--     requires = {
-		--         "kristijanhusak/vim-dadbod-ui",
-		--         "kristijanhusak/vim-dadbod-completion"
-		--     },
-		--     config = function()
-		--         require(config_dir .. "database").setup()
-		--     end,
-		--     cmd = {
-		--         "DBUIToggle", "DBUI", "DBUIAddConnection", "DBUIFindBuffer",
-		--         "DBUIRenameBuffer", "DBUILastQueryInfo"
-		--     }
-		-- }
 		-- anuvyklack/pretty-fold.nvim
 		use({
 			"anuvyklack/pretty-fold.nvim",
@@ -213,6 +184,21 @@ return require("packer").startup({
 				})
 				-- require('pretty-fold.preview').setup()
 			end,
+		})
+		use({
+			"kndndrj/nvim-dbee",
+			requires = {
+				"MunifTanjim/nui.nvim",
+			},
+			run = function()
+			-- Install tries to automatically detect the install method.
+			-- if it fails, try calling it with one of these parameters:
+			--    "curl", "wget", "bitsadmin", "go"
+				require("dbee").install()
+			end,
+			config = function()
+				require("dbee").setup(--[[optional config]])
+			end
 		})
 		-- andrejlevkovitch/vim-lua-format
 		-- use {'andrejlevkovitch/vim-lua-format'}

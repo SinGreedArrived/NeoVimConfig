@@ -44,7 +44,7 @@ vim.bo.expandtab = false
 vim.wo.list = true
 vim.o.listchars = 'tab:┆·,trail:·,precedes:,extends:'
 
-vim.g.markdown_fenced_languages = {'zsh', 'nvim', 'go'}
+-- vim.g.markdown_fenced_languages = {'zsh', 'nvim', 'go'}
 
 vim.g.termbufm_direction_cmd = 'new'
 

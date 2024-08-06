@@ -77,6 +77,39 @@ local firstChar = function(args)
 	})
 end
 
+local camelToSnake = function (args)
+	local word = args
+	local result = ""
+	local nbr = true
+
+	word:gsub(".", function(char)
+		if nbr then
+			result = result..char:lower()
+			nbr = false
+
+			return
+		end
+
+		if char >= 'A' and char <= 'Z' then
+			result = result..'_'..char:lower()
+
+			return
+		end
+
+		result = result..char
+	end)
+
+	return result
+end
+
+local upperCase = function(args)
+	local res = string.upper(camelToSnake(args[1][1]))
+	return sn(nil, {
+		t(res),
+	})
+end
+
+
 local lowerStart = function(args)
 	local lowerCase = args[1][1]:gsub("%a", string.lower, 1)
 	return sn(nil, {
@@ -85,11 +118,19 @@ local lowerStart = function(args)
 end
 
 local upperStart = function(args)
-	local upperCase = args[1][1]:gsub("%a", string.upper, 1)
+	local uc = args[1][1]:gsub("%a", string.upper, 1)
 	return sn(nil, {
-		t(upperCase),
+		t(uc),
 	})
 end
+
+local trimNumber = function(args)
+	local res = args[1][1]:gsub("%d+", "")
+	return sn(nil, {
+		t(res),
+	})
+end
+
 
 local trim_parenthese = function(args)
 	return args:gsub("%(", ""):gsub("%)", ""):gsub("%s", "")
@@ -125,6 +166,7 @@ end
 local get_nil_value = function(type)
 	local nilValue = {}
 	nilValue["^string$"] = [[""]]
+	nilValue["^bool$"] = "false"
 	nilValue["^%*"] = "nil"
 	nilValue["^error$"] = [[fmt.Errorf("]] .. func_name_for_err() .. [[: %w", err)]]
 	nilValue["u?int%d?%d?"] = "0"
@@ -157,7 +199,7 @@ local get_return = function()
 				method_result = line:match("^func.*%)%s(.*)%s{$")
 			end
 
-			if method_result ~= "" then
+			if method_result ~= "" and method_result ~= nil  then
 				local returns = split(trim_parenthese(method_result), ",")
 				for _, value in ipairs(returns) do
 					local val = get_nil_value(value)
@@ -175,6 +217,38 @@ end
 local testmode = s("testmode", t("This is test mode"))
 table.insert(snippets, testmode)
 
+local var = s(
+	{ trig = "var%s+(%S+)", regTrig = true, hidden = true },
+	fmt(
+		[[
+		var {} {}
+	]],
+		{
+			f(function(import)
+				local parts = vim.split(import[1][1], ".", true)
+				return parts[#parts]:gsub("^%u", string.lower)
+			end, { 1 }),
+			d(1, function(_, snip)
+				return sn(1, i(1, snip.captures[1]))
+			end),
+		}
+	)
+)
+table.insert(snippets, var)
+
+local iferr = s(
+	{ trig = "iferr" },
+	fmt(
+		[[
+	if err != nil {{
+		{}
+	}}
+]],
+		{ get_return() }
+	)
+)
+table.insert(snippets, iferr)
+
 local append = s(
 	{ trig = "ap", regTrig = true, hidden = true },
 	fmt(
@@ -189,19 +263,6 @@ local append = s(
 	)
 )
 table.insert(snippets, append)
-
-local iferr = s(
-	{ trig = "iferr" },
-	fmt(
-		[[
-	if err != nil {{
-		{}
-	}}
-]],
-		{ get_return() }
-	)
-)
-table.insert(snippets, iferr)
 
 local func = s(
 	{ trig = "fn%s+(.+)", regTrig = true, hidden = true },
@@ -262,43 +323,38 @@ local make_slice_or_map = s(
 )
 table.insert(snippets, make_slice_or_map)
 
-local var = s(
-	{ trig = "var%s+(%S+)", regTrig = true, hidden = true },
-	fmt(
-		[[
-		var {} {}
-	]],
-		{
-			f(function(import)
-				local parts = vim.split(import[1][1], ".", true)
-				return parts[#parts]:gsub("^%u", string.lower)
-			end, { 1 }),
-			d(1, function(_, snip)
-				return sn(1, i(1, snip.captures[1]))
-			end),
-		}
-	)
-)
-table.insert(snippets, var)
 
-local rerr = s(
-	{ trig = "rerr", regTrig = true },
-	fmt(
-		[[
-		{}.Require().{}
-	]],
-		{
-			i(1),
-			c(2, {
-				t("NoError(err)"),
-				t("Error(err)"),
-				sn(nil, { t("ErrorIs("), i(1), t(", "), i(2), t(")") }),
-			}),
-		}
-	)
-)
-table.insert(autosnippets, rerr)
-
+-- TODO replace
+-- -- baseService
+-- local baseService = s(
+-- 	{ trig = "baseService" },
+-- 	fmt(
+-- 		[[
+-- 	// Service.
+-- 	type {Name} struct {{
+-- 		{fields}
+-- 	}}
+--
+-- 	// New service.
+-- 	func New(
+-- 		{fieldsRepWithComm}
+-- 	) *{NameRep} {{
+-- 		s := &{NameRep}{{{}}}
+--
+-- 		return s
+-- 	}}
+-- ]],
+-- 		{
+-- 			Name = i(1, "Service"),
+-- 			fields = i(2, ""),
+-- 			NameRep = rep(1),
+-- 			fieldsRepWithComm = l(l._1:gsub("\n", ",\n"), 2),
+-- 			i(0),
+-- 		}
+-- 	)
+-- )
+-- table.insert(snippets, baseService)
+--
 local baseRepo = s(
 	{ trig = "baseRepo" },
 	fmt(
@@ -325,36 +381,8 @@ local baseRepo = s(
 )
 table.insert(snippets, baseRepo)
 
--- baseService
-local baseService = s(
-	{ trig = "baseService" },
-	fmt(
-		[[
-	// Service.
-	type {Name} struct {{
-		{fields}
-	}}
-
-	// New service.
-	func New(
-		{fieldsRepWithComm}
-	) *{NameRep} {{
-		s := &{NameRep}{{{}}}
-
-		return s
-	}}
-]],
-		{
-			Name = i(1, "Service"),
-			fields = i(2, ""),
-			NameRep = rep(1),
-			fieldsRepWithComm = l(l._1:gsub("\n", ",\n"), 2),
-			i(0),
-		}
-	)
-)
-table.insert(snippets, baseService)
-
+-- VALUE SNIPPETS --
+--
 local valueStr = s(
 	{ trig = "valueStr" },
 	fmt(
@@ -395,56 +423,6 @@ local valueStr = s(
 )
 table.insert(snippets, valueStr)
 
-local valueInt = s(
-	{ trig = "valueInt" },
-	fmt(
-		[[
-	package value
-
-	type {Name} {valueType}
-
-	func New{NameRep}({value} {valueTypeRep}) {NameRep} {{
-		return {NameRep}({valueRep})
-	}}
-
-	func ({char} {NameRep}) {ValueType}() {valueTypeRep} {{
-		return strconv.FormatInt(int64({charRep}), 10))
-	}}
-
-	func ({charRep} *{NameRep}) {ValueTypeRep}Ptr() *{valueTypeRep} {{
-		if {charRep} == nil {{
-			return nil
-		}}
-
-		res := {charRep}.{ValueTypeRep}()
-
-		return &res
-	}}
-	{}
-]],
-		{
-			Name = i(1, "Name"),
-			NameRep = rep(1),
-			valueType = c(2, {
-				t("int"),
-				t("int64"),
-				t("int8"),
-				t("int32"),
-				t("int16"),
-			}),
-			valueTypeRep = rep(2),
-			ValueType = d(3, upperStart, 2),
-			ValueTypeRep = rep(3),
-			value = d(4, lowerStart, 1),
-			valueRep = rep(4),
-			char = d(5, firstChar, 1),
-			charRep = rep(5),
-			i(0),
-		}
-	)
-)
-table.insert(snippets, valueInt)
-
 local valueUint = s(
 	{ trig = "valueUint" },
 	fmt(
@@ -458,7 +436,7 @@ local valueUint = s(
 	}}
 
 	func ({char} {NameRep}) {ValueType}() {valueTypeRep} {{
-		return strconv.FormatUint(uint64({charRep}), 10))
+		return {valueTypeRep}({charRep})
 	}}
 
 	func ({charRep} *{NameRep}) {ValueTypeRep}Ptr() *{valueTypeRep} {{
@@ -470,6 +448,20 @@ local valueUint = s(
 
 		return &res
 	}}
+
+	func ({charRep} {NameRep}) String() string {{
+		return strconv.Format{ValueTypeWithoutNumber}({valueTypeWithoutNumber}64({charRep}), 10)
+	}}
+
+	func ({charRep} *{NameRep}) StringPtr() *string {{
+		if {charRep} == nil {{
+			return nil
+		}}
+
+		res := {charRep}.String()
+
+		return &res
+	}}
 	{}
 ]],
 		{
@@ -477,10 +469,15 @@ local valueUint = s(
 			NameRep = rep(1),
 			valueType = c(2, {
 				t("uint"),
-				t("uint64"),
 				t("uint8"),
-				t("uint32"),
 				t("uint16"),
+				t("uint32"),
+				t("uint64"),
+				t("int"),
+				t("int8"),
+				t("int16"),
+				t("int32"),
+				t("int64"),
 			}),
 			valueTypeRep = rep(2),
 			ValueType = d(3, upperStart, 2),
@@ -489,16 +486,19 @@ local valueUint = s(
 			valueRep = rep(4),
 			char = d(5, firstChar, 1),
 			charRep = rep(5),
+			valueTypeWithoutNumber = d(6, trimNumber, 2),
+			ValueTypeWithoutNumber = d(7, upperStart, 6),
 			i(0),
 		}
 	)
 )
 table.insert(snippets, valueUint)
 
-local testRepo = s(
-	{ trig = "testRepo" },
-	fmt(
-		[[
+-- END VALUE SNIPPERS --
+
+-- TEST SNIPPETS --
+--
+local testRepo = s( { trig = "testRepo" }, fmt( [[
 			type test{Name}RepoSuite struct {{
 				suite.Suite
 
@@ -578,6 +578,26 @@ local testRepo = s(
 )
 table.insert(snippets, testRepo)
 
+local rerr = s(
+	{ trig = "rerr", regTrig = true },
+	fmt(
+		[[
+		{}.Require().{}
+	]],
+		{
+			i(1),
+			c(2, {
+				t("NoError(err)"),
+				t("Error(err)"),
+				sn(nil, { t("ErrorIs("), i(1), t(", "), i(2), t(")") }),
+			}),
+		}
+	)
+)
+table.insert(autosnippets, rerr)
+
+-- END TEST SNIPPETS --
+
 local returns = s(
 	{ trig = "ret" },
 	fmt(
@@ -593,5 +613,112 @@ table.insert(snippets, returns)
 
 local context = s({ trig = "ctx" }, fmt("{}", { t("ctx context.Context") }))
 table.insert(snippets, context)
+
+local httpClient = s(
+	{trig = "httpClient" },
+	fmt(
+		[[
+const (
+	method{methodName}Tmpl = "%s/{methodUri}"
+)
+
+type HttpClient interface {{
+	Do(ctx context.Context, req *http.Request, reqBodyDump bool, respBodyDump bool) (*http.Response, error)
+}}
+
+type client struct {{
+	cfg        config.{clientName}
+	httpClient HttpClient
+}}
+
+type Option func(c *client)
+
+func New(cfg config.{clientNameRep}, opts ...clients.Option) *client {{
+	return &client{{
+		cfg:        cfg,
+		httpClient: clients.New(cfg.RequestTimeout, opts...),
+	}}
+}}
+
+func (c *client) {methodNameRep}(
+	ctx context.Context,
+	body io.Reader,
+) ({response}, error) {{
+	var (
+		uri    = fmt.Sprintf(method{methodNameRep}Tmpl, c.cfg.Host)
+		method = http.{httpMethod}
+	)
+
+	req, err := http.NewRequestWithContext(ctx, method, uri, body)
+	if err != nil {{
+		return 0, fmt.Errorf("http.NewRequestWithContext: %w", err)
+	}}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", c.cfg.Token)
+
+	resp, err := c.httpClient.Do(ctx, req, {reqTrueFalse}, {respTrueFalse})
+	if err != nil {{
+		return 0, fmt.Errorf("httpClient.Do: %w", err)
+	}}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {{
+		var response {methodNameRep}Response
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {{
+			return 0, fmt.Errorf("json.NewDecoder: %w", err)
+		}}
+
+		return response.{fieldName}, nil
+	}}
+
+	return 0, failure.NewCustomError(resp.StatusCode, "Ошибка ответа от %s код: %d", c.cfg.Host, resp.StatusCode)
+}}{}
+		]],
+		{
+			methodName = i(1, "methodName"),
+			methodNameRep  = rep(1),
+			methodUri = i(2, "something_uri"),
+			clientName = i(3, "clientName"),
+			clientNameRep = rep(3),
+			reqTrueFalse = c(4, {
+				t("true"),
+				t("false"),
+			}),
+			respTrueFalse = c(5, {
+				t("true"),
+				t("false"),
+			}),
+			fieldName = i(6, "fieldName"),
+			response = i(7, "response"),
+			httpMethod = c(8, {
+				t("MethodGet"),
+				t("MethodPost"),
+			}),
+			i(0),
+		}
+	)
+)
+table.insert(snippets, httpClient)
+
+local configHttpClient = s(
+	{trig = "config_http_client" },
+	fmt(
+		[[
+{clientName} struct {{
+	Host           string        `envconfig:"{clientNameUpper}_HOST" default:"http://{host}"`
+	Token          value.Token   `envconfig:"{clientNameUpperRep}_TOKEN"`
+	RequestTimeout time.Duration `envconfig:"{clientNameUpperRep}_REQUEST_TIMEOUT" default:"5s"`
+}}{}
+		]],
+		{
+			clientName = i(1, "clientName"),
+			clientNameUpper = d(2, upperCase, 1),
+			clientNameUpperRep = rep(2),
+			host = i(3),
+			i(0),
+		}
+	)
+)
+table.insert(snippets, configHttpClient)
 
 return snippets, autosnippets

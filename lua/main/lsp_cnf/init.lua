@@ -25,30 +25,32 @@ nvim_config.gopls.setup({
 })
 
 -- nvim_config.sumneko_lua.setup({
--- 	settings = {
--- 		Lua = {
--- 			runtime = {
--- 				-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
--- 				version = "LuaJIT",
--- 				-- Setup your lua path
--- 				--        path = runtime_path,
--- 			},
--- 			diagnostics = {
--- 				-- Get the language server to recognize the `vim` global
--- 				globals = { "vim" },
--- 			},
--- 			workspace = {
--- 				-- Make the server aware of Neovim runtime files
--- 				library = vim.api.nvim_get_runtime_file("", true),
--- 			},
--- 			-- Do not send telemetry data containing a randomized but unique identifier
--- 			telemetry = { enable = false },
--- 		},
--- 	},
+	-- settings = {
+	-- 	Lua = {
+	-- 		runtime = {
+	-- 			-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+	-- 			version = "LuaJIT",
+	-- 			-- Setup your lua path
+	-- 			--        path = runtime_path,
+	-- 		},
+	-- 		diagnostics = {
+	-- 			-- Get the language server to recognize the `vim` global
+	-- 			globals = { "vim" },
+	-- 		},
+	-- 		workspace = {
+	-- 			-- Make the server aware of Neovim runtime files
+	-- 			library = vim.api.nvim_get_runtime_file("", true),
+	-- 		},
+	-- 		-- Do not send telemetry data containing a randomized but unique identifier
+	-- 		telemetry = { enable = false },
+	-- 	},
+	-- },
 -- })
+nvim_config.lua_ls.setup({})
 -- nvim_config.golangci_lint_ls.setup({})
 nvim_config.rust_analyzer.setup({})
-nvim_config.phpactor.setup({})
-nvim_config.sqls.setup({})
+nvim_config.sqlls.setup({})
 nvim_config.yamlls.setup({})
+nvim_config.pyright.setup({})
+
 require(config_dir .. "lsp_cnf.handlers")

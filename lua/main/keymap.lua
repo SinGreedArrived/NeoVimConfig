@@ -96,6 +96,7 @@ vim.keymap.set("n", ";W", "<cmd>wa!<CR>", default_opts)
 vim.keymap.set("n", ";q", "<cmd>bdelete<CR>", default_opts)
 vim.keymap.set("n", ";Q", "<cmd>q!<CR>", default_opts)
 vim.keymap.set("n", "<leader>c", "<cmd>nohlsearch<CR>", default_opts)
+vim.keymap.set("n", "<c-e>", "<cmd>ExecCommand<CR>")
 
 -- bufferline
 vim.keymap.set("n", "<c-l>", "<cmd>BufferLineCycleNext<CR>", default_opts)

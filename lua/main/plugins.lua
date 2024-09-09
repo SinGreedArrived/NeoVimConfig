@@ -38,10 +38,21 @@ return require("packer").startup({
 		-- ray-x/go.nvim
 		use({
 			"ray-x/go.nvim",
-			requires = { { "ray-x/guihua.lua" } },
-			config = function()
-				require("go").setup()
-			end,
+  		requires = {  -- optional packages
+  		  "ray-x/guihua.lua",
+  		  "neovim/nvim-lspconfig",
+  		  "nvim-treesitter/nvim-treesitter",
+  		},
+  		config = function()
+  		  require("go").setup({
+					goimports ='gopls', -- goimports command, can be gopls[default] or either goimports or golines if need to split long lines
+					gofmt = 'golines', -- gofmt through gopls: alternative is gofumpt, goimports, golines, gofmt, etc
+					max_line_len = 80,
+				})
+  		end,
+  		event = {"CmdlineEnter"},
+  		ft = {"go", 'gomod'},
+  		build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
 		})
 		-- L3MON4D3/LuaSnip
 		use({
@@ -185,21 +196,22 @@ return require("packer").startup({
 				-- require('pretty-fold.preview').setup()
 			end,
 		})
-		use({
-			"kndndrj/nvim-dbee",
-			requires = {
-				"MunifTanjim/nui.nvim",
-			},
-			run = function()
-			-- Install tries to automatically detect the install method.
-			-- if it fails, try calling it with one of these parameters:
-			--    "curl", "wget", "bitsadmin", "go"
-				require("dbee").install()
-			end,
-			config = function()
-				require("dbee").setup(--[[optional config]])
-			end
-		})
+		-- kndndrj/nvim-dbee
+		-- use({
+		-- 	"kndndrj/nvim-dbee",
+		-- 	requires = {
+		-- 		"MunifTanjim/nui.nvim",
+		-- 	},
+		-- 	run = function()
+		-- 	-- Install tries to automatically detect the install method.
+		-- 	-- if it fails, try calling it with one of these parameters:
+		-- 	--    "curl", "wget", "bitsadmin", "go"
+		-- 		require("dbee").install()
+		-- 	end,
+		-- 	config = function()
+		-- 		require("dbee").setup(--[[optional config]])
+		-- 	end
+		-- })
 		-- andrejlevkovitch/vim-lua-format
 		-- use {'andrejlevkovitch/vim-lua-format'}
 		--
